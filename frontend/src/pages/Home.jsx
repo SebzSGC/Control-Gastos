@@ -131,7 +131,7 @@ export default function Home() {
     <>
       <Navbar />
 
-      <main className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 120px)', padding: '2rem 1rem' }}>
+      <main className="container home-main-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 120px)' }}>
         
         {/* Hero Section */}
         <div style={{ textAlign: 'center', maxWidth: '640px', marginBottom: '2.5rem' }} className="animate-fade-in">
@@ -167,7 +167,7 @@ export default function Home() {
         </div>
 
         {/* Action Card with Tabs */}
-        <div className="glass-panel animate-fade-in" style={{ width: '100%', maxWidth: '460px', padding: '2rem', marginBottom: '2.5rem' }}>
+        <div className="glass-panel home-action-card animate-fade-in" style={{ width: '100%', maxWidth: '460px', marginBottom: '2.5rem' }}>
           
           {/* Segmented Mode Switcher */}
           <div className="segmented-control" style={{ marginBottom: '1.75rem' }}>

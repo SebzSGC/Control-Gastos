@@ -565,7 +565,7 @@ export default function Dashboard() {
         onSwitchProfile={() => navigate(`/group/${id}`)}
       />
 
-      <main className="container animate-fade-in" style={{ padding: '1.5rem 1rem 3rem' }}>
+      <main className="container dashboard-main-container animate-fade-in">
         
         {/* Real-time Live Bill Alert Banner */}
         {activeLiveBill && (
@@ -605,10 +605,10 @@ export default function Dashboard() {
         )}
 
         {/* Top Greeting & Action Banner */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
-          <div>
+        <div className="dashboard-header-row">
+          <div className="dashboard-greeting-block">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <h1 style={{ fontSize: '1.8rem', fontWeight: '800', letterSpacing: '-0.02em', margin: 0 }}>
+              <h1 className="dashboard-group-title">
                 {group.name}
               </h1>
               <span className="navbar-code-tag" onClick={() => {
@@ -618,34 +618,34 @@ export default function Dashboard() {
                 #{group.id}
               </span>
             </div>
-            <p className="text-muted" style={{ margin: '0.35rem 0 0', fontSize: '0.92rem' }}>
+            <p className="text-muted dashboard-welcome-sub" style={{ margin: '0.35rem 0 0', fontSize: '0.92rem' }}>
               Hola, <strong style={{ color: 'var(--text-main)' }}>{me.name}</strong> • Tablero de finanzas compartidas
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <div className="dashboard-action-buttons">
             <button
-              className="btn-secondary"
+              className="btn-secondary dashboard-action-btn"
               onClick={() => setShowProfileModal(true)}
               title="Mi Llave Bre-B / Nequi"
             >
-              <Smartphone size={17} /> Mi Llave de Pago
+              <Smartphone size={16} /> <span>Mi Llave de Pago</span>
             </button>
             <button
-              className="btn-primary btn-success-glow"
+              className="btn-primary btn-success-glow dashboard-action-btn"
               onClick={() => setShowBillModal(true)}
               title="Subir foto de factura y desglosar productos entre participantes"
             >
-              <Receipt size={17} /> Pagar con Factura
+              <Receipt size={16} /> <span>Pagar con Factura</span>
             </button>
             <button
-              className="btn-primary"
+              className="btn-primary dashboard-action-btn dashboard-action-main"
               onClick={() => {
                 setTxType('expense');
                 setShowModal(true);
               }}
             >
-              <Plus size={18} /> Registrar Movimiento
+              <Plus size={18} /> <span>Registrar Movimiento</span>
             </button>
           </div>
         </div>
@@ -733,43 +733,43 @@ export default function Dashboard() {
 
         {/* Tab 1: Balances & Smart Settlement */}
         {activeTab === 'balances' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
+          <div className="dashboard-tab-grid">
             
             {/* Left: Balances by Member */}
             <div className="glass-panel" style={{ padding: '1.75rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: '700' }}>Balance de Cada Miembro</h3>
-                <span className="text-subtle">Base justa: {formatCOP(fairShare)}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.4rem' }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: '700', margin: 0 }}>Balance de Cada Miembro</h3>
+                <span className="text-subtle" style={{ fontSize: '0.8rem' }}>Base justa: {formatCOP(fairShare)}</span>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {balances.map(b => (
-                  <div key={b.id} className="expense-item" style={{ marginBottom: 0, padding: '1rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                  <div key={b.id} className="expense-item balance-member-item" style={{ marginBottom: 0 }}>
+                    <div className="balance-member-left">
                       <div
                         className="navbar-user-avatar"
-                        style={{ width: 38, height: 38, fontSize: '1rem' }}
+                        style={{ width: 38, height: 38, fontSize: '1rem', flexShrink: 0 }}
                       >
                         {b.name.charAt(0).toUpperCase()}
                       </div>
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                          <span style={{ fontWeight: '700', fontSize: '1rem' }}>{b.name}</span>
+                      <div className="balance-member-text">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                          <span style={{ fontWeight: '700', fontSize: '0.98rem' }}>{b.name}</span>
                           {b.id === me.id && (
                             <span style={{ fontSize: '0.7rem', background: 'var(--primary-glow)', color: 'var(--primary)', padding: '0.1rem 0.45rem', borderRadius: 'var(--radius-full)', fontWeight: '700' }}>
                               Tú
                             </span>
                           )}
                         </div>
-                        <span className="text-subtle" style={{ display: 'block' }}>
+                        <span className="text-subtle balance-member-breakdown" style={{ display: 'block', marginTop: '0.15rem' }}>
                           Aportó: {formatCOP(b.paid + b.transferred)} • Recibió: {formatCOP(b.received)}
                         </span>
                       </div>
                     </div>
 
-                    <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.35rem' }}>
+                    <div className="balance-member-right">
                       <span
-                        className="num-tabular"
+                        className="num-tabular balance-member-amount"
                         style={{
                           fontWeight: '800',
                           fontSize: '1.05rem',
@@ -782,21 +782,10 @@ export default function Dashboard() {
                       {/* Payment info button */}
                       {b.id !== me.id && (
                         <button
+                          className="balance-pay-key-btn"
                           onClick={() => setSelectedPayProfile(b)}
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: 'var(--primary)',
-                            fontSize: '0.78rem',
-                            fontWeight: '600',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.3rem',
-                            cursor: 'pointer',
-                            padding: 0,
-                          }}
                         >
-                          <Smartphone size={13} /> {b.payment_key ? 'Ver llave de pago' : 'Sin llave'}
+                          <Smartphone size={13} /> {b.payment_key ? 'Ver llave' : 'Sin llave'}
                         </button>
                       )}
                     </div>
@@ -809,9 +798,9 @@ export default function Dashboard() {
             <div className="glass-panel" style={{ padding: '1.75rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                 <Sparkles size={20} color="var(--accent)" />
-                <h3 style={{ fontSize: '1.15rem', fontWeight: '700' }}>Liquidación Óptima</h3>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: '700', margin: 0 }}>Liquidación Óptima</h3>
               </div>
-              <p className="text-muted" style={{ fontSize: '0.88rem', marginBottom: '1.5rem' }}>
+              <p className="text-muted" style={{ fontSize: '0.88rem', marginBottom: '1.5rem', lineHeight: '1.4' }}>
                 Algoritmo inteligente para saldar todas las deudas con el menor número posible de transferencias.
               </p>
 
@@ -840,7 +829,7 @@ export default function Dashboard() {
                             : '1px solid var(--border-subtle)',
                         }}
                       >
-                        <div style={{ flex: 1 }}>
+                        <div className="settlement-card-info">
                           <div className="settlement-flow">
                             <span className="settlement-person">
                               {st.from_name} {isFromMe ? '(Tú)' : ''}
@@ -851,12 +840,12 @@ export default function Dashboard() {
                             </span>
                           </div>
 
-                          <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <span className="num-tabular" style={{ fontWeight: '800', fontSize: '1.2rem', color: 'var(--text-main)' }}>
+                          <div className="settlement-card-amount-row">
+                            <span className="num-tabular settlement-amount" style={{ fontWeight: '800', fontSize: '1.15rem', color: 'var(--text-main)' }}>
                               {formatCOP(st.amount)}
                             </span>
                             {isFromMe && (
-                              <span style={{ fontSize: '0.75rem', background: 'var(--danger-bg)', color: 'var(--danger)', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-full)', fontWeight: '700' }}>
+                              <span className="settlement-badge-debt">
                                 Tu deuda pendiente
                               </span>
                             )}
@@ -866,9 +855,8 @@ export default function Dashboard() {
                         {/* Pay Creditor Button */}
                         {toProfile && (
                           <button
-                            className="btn-secondary"
+                            className="btn-secondary settlement-pay-btn"
                             onClick={() => setSelectedPayProfile(toProfile)}
-                            style={{ padding: '0.5rem 0.85rem', fontSize: '0.82rem', flexShrink: 0 }}
                             title={`Ver datos de pago de ${st.to_name}`}
                           >
                             <Wallet size={14} /> Pagar
@@ -886,7 +874,7 @@ export default function Dashboard() {
 
         {/* Tab 2: Visual Analytics */}
         {activeTab === 'analytics' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
+          <div className="dashboard-tab-grid">
             
             {/* BarChart: Gastos por Fecha */}
             <div className="glass-panel" style={{ padding: '1.75rem' }}>
@@ -1015,8 +1003,8 @@ export default function Dashboard() {
           <div className="glass-panel" style={{ padding: '1.75rem' }}>
             
             {/* Search & Filter Bar */}
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <div style={{ flex: 1, minWidth: '240px', position: 'relative' }}>
+            <div className="history-search-filter-row">
+              <div className="history-search-input-wrap" style={{ position: 'relative' }}>
                 <Search size={17} color="var(--text-muted)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
                 <input
                   type="text"
@@ -1024,11 +1012,11 @@ export default function Dashboard() {
                   placeholder="Buscar por concepto o participante..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{ paddingLeft: '2.5rem' }}
+                  style={{ paddingLeft: '2.5rem', width: '100%' }}
                 />
               </div>
 
-              <div className="segmented-control" style={{ width: 'auto' }}>
+              <div className="segmented-control history-segmented-control">
                 <button
                   className={`segmented-btn ${historyFilter === 'all' ? 'active' : ''}`}
                   onClick={() => setHistoryFilter('all')}
@@ -1073,7 +1061,7 @@ export default function Dashboard() {
                   return (
                     <div
                       key={ex.id}
-                      className="expense-item animate-fade-in"
+                      className="expense-item history-expense-item animate-fade-in"
                       style={{
                         borderLeft: isBill 
                           ? '3.5px solid var(--accent-mint)' 
@@ -1082,14 +1070,14 @@ export default function Dashboard() {
                           : '3.5px solid var(--accent)',
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                      <div className="history-item-main">
                         <div className={`expense-item-icon-box ${isBill ? 'bill' : isTransfer ? 'transfer' : 'expense'}`}>
                           {isBill ? <Receipt size={18} /> : isTransfer ? <Send size={18} /> : <Receipt size={18} />}
                         </div>
 
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                            <h4 style={{ fontSize: '1.02rem', fontWeight: '700', margin: 0, color: 'var(--text-main)' }}>
+                        <div className="history-item-details">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+                            <h4 className="history-item-title" style={{ fontWeight: '700', margin: 0, color: 'var(--text-main)' }}>
                               {ex.description}
                             </h4>
                             {isBill && (
@@ -1105,7 +1093,7 @@ export default function Dashboard() {
                               </span>
                             )}
                           </div>
-                          <span className="text-subtle" style={{ display: 'block', marginTop: '0.2rem' }}>
+                          <span className="text-subtle history-item-meta" style={{ display: 'block', marginTop: '0.2rem' }}>
                             {isTransfer ? (
                               <>
                                 <strong>{ex.profile_name}</strong> transfirió a <strong>{receiver?.name || 'Compañero'}</strong>
@@ -1125,11 +1113,10 @@ export default function Dashboard() {
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <div className="history-item-trailing">
                         {isBill && (
                           <button
-                            className="btn-secondary btn-sm"
-                            style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}
+                            className="btn-secondary btn-sm history-breakdown-btn"
                             onClick={() => {
                               const found = bills.find(b => b.id === ex.bill_id || b.date === ex.date || b.payer_profile_id === ex.profile_id);
                               setViewingBill(found || {
@@ -1147,12 +1134,12 @@ export default function Dashboard() {
                           </button>
                         )}
 
-                        <span className="num-tabular" style={{ fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-main)' }}>
+                        <span className="num-tabular history-item-amount" style={{ fontWeight: '800', color: 'var(--text-main)' }}>
                           {formatCOP(ex.amount)}
                         </span>
 
                         <button
-                          className="btn-danger-ghost"
+                          className="btn-danger-ghost history-delete-btn"
                           onClick={() => setExpenseToDelete(ex)}
                           title="Eliminar movimiento"
                         >

@@ -205,10 +205,10 @@ export default function LiveBillClaimModal({
               const shareEach = assigned.length > 0 ? (item.subtotal / assigned.length) : item.subtotal;
 
               return (
-                <div 
+                <div
                   key={item.id}
                   onClick={() => handleToggleClaim(item)}
-                  className={`glass-card glass-card-interactive ${isClaimedByMe ? 'card-assigned' : ''}`}
+                  className={`glass-card glass-card-interactive live-claim-item-card ${isClaimedByMe ? 'card-assigned' : ''}`}
                   style={{
                     padding: '1rem 1.2rem',
                     borderRadius: 'var(--radius-lg)',
@@ -219,10 +219,6 @@ export default function LiveBillClaimModal({
                       ? 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(16, 185, 129, 0.08) 100%)' 
                       : 'var(--bg-surface)',
                     cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '1rem',
                     transition: 'all 0.2s ease'
                   }}
                 >
@@ -284,7 +280,7 @@ export default function LiveBillClaimModal({
                   </div>
 
                   {/* Right: Price */}
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div className="live-claim-item-trailing" style={{ textAlign: 'right', flexShrink: 0 }}>
                     <span style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-primary)', display: 'block' }}>
                       {formatCOP(item.subtotal)}
                     </span>
@@ -300,18 +296,7 @@ export default function LiveBillClaimModal({
           </div>
 
           {/* Running total for current user */}
-          <div style={{
-            marginTop: '1.5rem',
-            padding: '1.1rem 1.25rem',
-            borderRadius: 'var(--radius-lg)',
-            background: 'linear-gradient(135deg, var(--bg-card) 0%, rgba(99, 102, 241, 0.1) 100%)',
-            border: '1px solid var(--border-subtle)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '1rem'
-          }}>
+          <div className="live-claim-summary-card">
             <div>
               <span className="card-label" style={{ marginBottom: '0.2rem' }}>MI CONSUMO SELECCIONADO</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

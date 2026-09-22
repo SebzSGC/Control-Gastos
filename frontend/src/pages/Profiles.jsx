@@ -186,19 +186,19 @@ export default function Profiles() {
     <>
       <Navbar group={group} />
 
-      <main className="container" style={{ padding: '2.5rem 1.5rem', maxWidth: '960px' }}>
+      <main className="container profiles-main-container" style={{ maxWidth: '960px' }}>
         
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }} className="animate-fade-in">
+        <div className="profiles-header animate-fade-in" style={{ textAlign: 'center', marginBottom: '3rem' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--primary-glow)', color: 'var(--primary)', padding: '0.35rem 0.85rem', borderRadius: 'var(--radius-full)', fontSize: '0.8rem', fontWeight: '700', marginBottom: '1rem', border: '1px solid rgba(99, 102, 241, 0.25)' }}>
             <User size={13} /> SELECCIÓN DE PARTICIPANTE
           </div>
 
-          <h1 style={{ fontSize: 'clamp(2rem, 4vw, 2.8rem)', fontWeight: '800', letterSpacing: '-0.02em', marginBottom: '0.75rem' }}>
+          <h1 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.8rem)', fontWeight: '800', letterSpacing: '-0.02em', marginBottom: '0.75rem' }}>
             ¿Quién eres en <span className="text-gradient">{group.name}</span>?
           </h1>
 
-          <p className="text-muted" style={{ fontSize: '1.05rem', maxWidth: '520px', margin: '0 auto' }}>
+          <p className="text-muted" style={{ fontSize: '1rem', maxWidth: '520px', margin: '0 auto' }}>
             Selecciona tu tarjeta para entrar al tablero de gastos y registrar pagos a tu nombre.
           </p>
         </div>
