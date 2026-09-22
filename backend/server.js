@@ -59,13 +59,18 @@ app.use(express.json());
 
 // SQLite setup with configurable persistence path (Docker volumes / Cloud Disks)
 const rawDbPath = process.env.DATABASE_PATH || process.env.DB_PATH;
-const dbPath = rawDbPath 
+let dbPath = rawDbPath 
   ? path.resolve(rawDbPath)
   : path.join(__dirname, 'app_data.db');
 
-const dbDir = path.dirname(dbPath);
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
+try {
+  const dbDir = path.dirname(dbPath);
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+} catch (dirErr) {
+  console.warn(`⚠️ Warning: Could not create directory for DATABASE_PATH (${dbPath}): ${dirErr.message}. Falling back to local app_data.db`);
+  dbPath = path.join(__dirname, 'app_data.db');
 }
 
 const db = new sqlite3.Database(dbPath, (err) => {
