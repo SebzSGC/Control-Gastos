@@ -155,6 +155,27 @@ db.serialize(() => {
     items_summary TEXT
   )`);
 
+  // Active live bill sessions for real-time collaborative bill splitting
+  db.run(`CREATE TABLE IF NOT EXISTS active_bill_sessions (
+    id TEXT PRIMARY KEY,
+    group_id TEXT NOT NULL,
+    title TEXT,
+    store_name TEXT,
+    host_profile_id TEXT,
+    host_name TEXT,
+    subtotal REAL DEFAULT 0,
+    tax REAL DEFAULT 0,
+    tip REAL DEFAULT 0,
+    discount REAL DEFAULT 0,
+    total_amount REAL DEFAULT 0,
+    tax_distribution TEXT DEFAULT 'proportional',
+    items TEXT,
+    assignments TEXT,
+    status TEXT DEFAULT 'active',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
   // Performance indexes
   db.run("CREATE INDEX IF NOT EXISTS idx_profiles_group ON profiles(group_id)");
   db.run("CREATE INDEX IF NOT EXISTS idx_expenses_group ON expenses(group_id)");
@@ -162,6 +183,7 @@ db.serialize(() => {
   db.run("CREATE INDEX IF NOT EXISTS idx_bills_group ON bills(group_id)");
   db.run("CREATE INDEX IF NOT EXISTS idx_bill_items_bill ON bill_items(bill_id)");
   db.run("CREATE INDEX IF NOT EXISTS idx_bill_splits_bill ON bill_splits(bill_id)");
+  db.run("CREATE INDEX IF NOT EXISTS idx_active_bill_sessions_group ON active_bill_sessions(group_id)");
 });
 
 // Configure Multer for uploads (Hardened: 5MB limit, strict MIME filter, configurable volume)
@@ -302,9 +324,198 @@ app.get('/api/groups/:id', (req, res) => {
             });
           }));
           
-          res.json({ group, profiles, expenses, bills: populatedBills });
+          // Query active live bill session if one exists for real-time sync across devices
+          db.get("SELECT * FROM active_bill_sessions WHERE group_id = ? AND status = 'active' ORDER BY created_at DESC LIMIT 1", [groupId], (aErr, activeRow) => {
+            let activeBillSession = null;
+            if (activeRow) {
+              let parsedItems = [];
+              let parsedAssignments = {};
+              try { parsedItems = JSON.parse(activeRow.items || '[]'); } catch (e) { parsedItems = []; }
+              try { parsedAssignments = JSON.parse(activeRow.assignments || '{}'); } catch (e) { parsedAssignments = {}; }
+
+              activeBillSession = {
+                ...activeRow,
+                sessionId: activeRow.id,
+                groupId: activeRow.group_id,
+                group_id: activeRow.group_id,
+                storeName: activeRow.store_name,
+                hostProfileId: activeRow.host_profile_id,
+                hostName: activeRow.host_name,
+                totalAmount: activeRow.total_amount,
+                taxDistribution: activeRow.tax_distribution,
+                items: parsedItems,
+                assignments: parsedAssignments,
+                initialClaims: parsedAssignments
+              };
+            }
+
+            res.json({
+              group,
+              profiles,
+              expenses,
+              bills: populatedBills,
+              activeBillSession
+            });
+          });
         });
       });
+    });
+  });
+});
+
+// Live Bill Sessions: Create or start an active collaborative bill session (Comanda Viva)
+app.post('/api/bill-sessions', (req, res) => {
+  const {
+    id,
+    sessionId,
+    groupId,
+    group_id,
+    title,
+    storeName,
+    store_name,
+    hostProfileId,
+    host_profile_id,
+    hostName,
+    host_name,
+    subtotal,
+    tax,
+    tip,
+    discount,
+    totalAmount,
+    total_amount,
+    taxDistribution,
+    tax_distribution,
+    items,
+    assignments,
+    initialClaims
+  } = req.body;
+
+  const targetGroupId = sanitizeGroupId(group_id || groupId);
+  if (!targetGroupId) {
+    return res.status(400).json({ error: 'group_id o groupId es requerido y debe ser válido' });
+  }
+
+  const sid = (sessionId || id || `live-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`).toString();
+  const cleanTitle = (title || 'Comanda en vivo').toString().trim().slice(0, 150);
+  const cleanStoreName = (store_name || storeName || cleanTitle).toString().trim().slice(0, 150);
+  const cleanHostProfileId = (host_profile_id || hostProfileId || '').toString();
+  const cleanHostName = (host_name || hostName || 'Anfitrión').toString().trim().slice(0, 60);
+  const cleanTaxDist = (tax_distribution || taxDistribution || 'proportional').toString();
+  const numSubtotal = Number(subtotal) || 0;
+  const numTax = Number(tax) || 0;
+  const numTip = Number(tip) || 0;
+  const numDiscount = Number(discount) || 0;
+  const numTotal = Number(total_amount ?? totalAmount ?? (numSubtotal + numTax + numTip - numDiscount));
+
+  const parsedItems = Array.isArray(items) ? items : [];
+  const parsedAssignments = (assignments && typeof assignments === 'object') 
+    ? assignments 
+    : (initialClaims && typeof initialClaims === 'object' ? initialClaims : {});
+
+  const itemsJson = JSON.stringify(parsedItems);
+  const assignmentsJson = JSON.stringify(parsedAssignments);
+
+  // Archive any previously active sessions for this room
+  db.run("UPDATE active_bill_sessions SET status = 'closed', updated_at = CURRENT_TIMESTAMP WHERE group_id = ? AND status = 'active'", [targetGroupId], (uErr) => {
+    if (uErr) console.warn('Warning archiving previous active bill sessions:', uErr.message);
+
+    const insertSql = `
+      INSERT INTO active_bill_sessions (
+        id, group_id, title, store_name, host_profile_id, host_name,
+        subtotal, tax, tip, discount, total_amount, tax_distribution,
+        items, assignments, status, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `;
+
+    db.run(insertSql, [
+      sid, targetGroupId, cleanTitle, cleanStoreName, cleanHostProfileId, cleanHostName,
+      numSubtotal, numTax, numTip, numDiscount, numTotal, cleanTaxDist,
+      itemsJson, assignmentsJson
+    ], function(insertErr) {
+      if (insertErr) {
+        return res.status(500).json({ error: 'Error al registrar sesión en vivo: ' + insertErr.message });
+      }
+
+      const sessionData = {
+        id: sid,
+        sessionId: sid,
+        groupId: targetGroupId,
+        group_id: targetGroupId,
+        title: cleanTitle,
+        storeName: cleanStoreName,
+        store_name: cleanStoreName,
+        hostProfileId: cleanHostProfileId,
+        host_profile_id: cleanHostProfileId,
+        hostName: cleanHostName,
+        host_name: cleanHostName,
+        subtotal: numSubtotal,
+        tax: numTax,
+        tip: numTip,
+        discount: numDiscount,
+        totalAmount: numTotal,
+        total_amount: numTotal,
+        taxDistribution: cleanTaxDist,
+        tax_distribution: cleanTaxDist,
+        items: parsedItems,
+        assignments: parsedAssignments,
+        initialClaims: parsedAssignments,
+        status: 'active',
+        createdAt: new Date().toISOString()
+      };
+
+      // Emit live event to all connected devices in the group
+      io.to(targetGroupId).emit('bill_session_started', sessionData);
+      console.log(`🧾 [LIVE BILL] Session started & emitted to group ${targetGroupId} by ${cleanHostName}`);
+
+      res.status(201).json(sessionData);
+    });
+  });
+});
+
+// GET /api/bill-sessions/active/:groupId: Retrieve the currently active live bill session
+app.get('/api/bill-sessions/active/:groupId', (req, res) => {
+  const targetGroupId = sanitizeGroupId(req.params.groupId);
+  if (!targetGroupId) return res.status(400).json({ error: 'ID de grupo inválido' });
+
+  db.get("SELECT * FROM active_bill_sessions WHERE group_id = ? AND status = 'active' ORDER BY created_at DESC LIMIT 1", [targetGroupId], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.json({ active: false, session: null });
+
+    let parsedItems = [];
+    let parsedAssignments = {};
+    try { parsedItems = JSON.parse(row.items || '[]'); } catch (e) { parsedItems = []; }
+    try { parsedAssignments = JSON.parse(row.assignments || '{}'); } catch (e) { parsedAssignments = {}; }
+
+    const sessionData = {
+      ...row,
+      sessionId: row.id,
+      groupId: row.group_id,
+      group_id: row.group_id,
+      storeName: row.store_name,
+      hostProfileId: row.host_profile_id,
+      hostName: row.host_name,
+      totalAmount: row.total_amount,
+      taxDistribution: row.tax_distribution,
+      items: parsedItems,
+      assignments: parsedAssignments,
+      initialClaims: parsedAssignments
+    };
+
+    res.json({ active: true, session: sessionData });
+  });
+});
+
+// PUT /api/bill-sessions/:id/close: Finalize or cancel active live bill session
+app.put('/api/bill-sessions/:id/close', (req, res) => {
+  const sessionId = req.params.id;
+  db.get("SELECT * FROM active_bill_sessions WHERE id = ?", [sessionId], (err, session) => {
+    if (err || !session) return res.status(404).json({ error: 'Sesión no encontrada' });
+
+    db.run("UPDATE active_bill_sessions SET status = 'closed', updated_at = CURRENT_TIMESTAMP WHERE id = ?", [sessionId], (uErr) => {
+      if (uErr) return res.status(500).json({ error: uErr.message });
+
+      io.to(session.group_id).emit('bill_session_closed', { groupId: session.group_id, sessionId });
+      res.json({ success: true, message: 'Sesión finalizada exitosamente' });
     });
   });
 });
@@ -921,6 +1132,10 @@ app.post('/api/bills', (req, res) => {
               bill_id: billId
             };
 
+            // Archive active live bill session for the group upon finalization
+            db.run("UPDATE active_bill_sessions SET status = 'closed', updated_at = CURRENT_TIMESTAMP WHERE group_id = ? AND status = 'active'", [group_id], () => {});
+            io.to(group_id).emit('bill_session_closed', { groupId: group_id, billId });
+
             io.to(group_id).emit('bill_added', billPayload);
             io.to(group_id).emit('expense_added', expensePayload);
 
@@ -998,34 +1213,103 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('start_bill_session', (data) => {
-    const groupId = sanitizeGroupId(data?.groupId);
-    if (groupId) {
-      socket.to(groupId).emit('bill_session_started', data);
-      console.log(`🧾 Live bill session started in group ${groupId} by ${data.hostName}`);
-    }
-  });
+  // Live Collaborative Bill Splitting (Comanda Viva)
+  const handleToggleAssignment = (data) => {
+    const groupId = sanitizeGroupId(data?.groupId || data?.group_id);
+    if (!groupId) return;
 
-  socket.on('bill_session_started', (data) => {
-    const groupId = sanitizeGroupId(data?.groupId);
+    const sessionId = data?.sessionId || data?.id;
+    const itemId = data?.itemId;
+    const profileId = data?.profileId;
+    const profileName = data?.profileName || 'Un integrante';
+    const itemName = data?.itemName;
+    const selected = data?.selected !== false;
+    const incomingAssignments = data?.assignments;
+
+    // Locate active bill session
+    const query = sessionId
+      ? "SELECT * FROM active_bill_sessions WHERE id = ? AND status = 'active'"
+      : "SELECT * FROM active_bill_sessions WHERE group_id = ? AND status = 'active' ORDER BY created_at DESC LIMIT 1";
+    const params = sessionId ? [sessionId] : [groupId];
+
+    db.get(query, params, (err, row) => {
+      let currentAssignments = {};
+      if (row && row.assignments) {
+        try {
+          currentAssignments = JSON.parse(row.assignments);
+        } catch (e) {
+          currentAssignments = {};
+        }
+      }
+
+      if (incomingAssignments && typeof incomingAssignments === 'object') {
+        currentAssignments = { ...currentAssignments, ...incomingAssignments };
+      } else if (itemId && profileId) {
+        const curList = currentAssignments[itemId] || [];
+        const updatedList = selected
+          ? (curList.includes(profileId) ? curList : [...curList, profileId])
+          : curList.filter(id => id !== profileId);
+        currentAssignments[itemId] = updatedList;
+      }
+
+      // Persist in active_bill_sessions in SQLite
+      if (row) {
+        db.run(
+          "UPDATE active_bill_sessions SET assignments = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+          [JSON.stringify(currentAssignments), row.id],
+          (uErr) => {
+            if (uErr) console.warn('Warning updating active_bill_sessions assignments:', uErr.message);
+          }
+        );
+      }
+
+      const updatePayload = {
+        groupId,
+        group_id: groupId,
+        sessionId: row?.id || sessionId,
+        itemId,
+        itemName,
+        profileId,
+        profileName,
+        selected,
+        assignments: currentAssignments,
+        initialClaims: currentAssignments,
+        timestamp: new Date().toISOString()
+      };
+
+      // Broadcast real-time update to all clients in the room (both cellphones)
+      io.to(groupId).emit('bill_assignments_updated', updatePayload);
+      io.to(groupId).emit('bill_item_claimed', updatePayload);
+      console.log(`🍽️ [LIVE BILL] ${profileName} (${profileId}) ${selected ? 'claimed' : 'unclaimed'} item ${itemId} in group ${groupId}`);
+    });
+  };
+
+  socket.on('toggle_bill_item', handleToggleAssignment);
+  socket.on('toggle_item_assignment', handleToggleAssignment);
+  socket.on('bill_item_claimed', handleToggleAssignment);
+  socket.on('update_bill_assignments', handleToggleAssignment);
+
+  socket.on('start_bill_session', (data) => {
+    const groupId = sanitizeGroupId(data?.groupId || data?.group_id);
     if (groupId) {
-      socket.to(groupId).emit('bill_session_started', data);
+      io.to(groupId).emit('bill_session_started', data);
       console.log(`🧾 Live bill session broadcast in group ${groupId}`);
     }
   });
 
-  socket.on('bill_item_claimed', (data) => {
-    const groupId = sanitizeGroupId(data?.groupId);
+  socket.on('bill_session_started', (data) => {
+    const groupId = sanitizeGroupId(data?.groupId || data?.group_id);
     if (groupId) {
-      socket.to(groupId).emit('bill_item_claimed', data);
-      console.log(`🍽️ Bill item claim relayed in group ${groupId} for item ${data.itemId}`);
+      io.to(groupId).emit('bill_session_started', data);
+      console.log(`🧾 Live bill session broadcast in group ${groupId}`);
     }
   });
 
   socket.on('bill_session_closed', (data) => {
-    const groupId = sanitizeGroupId(data?.groupId);
+    const groupId = sanitizeGroupId(data?.groupId || data?.group_id);
     if (groupId) {
-      socket.to(groupId).emit('bill_session_closed', data);
+      db.run("UPDATE active_bill_sessions SET status = 'closed', updated_at = CURRENT_TIMESTAMP WHERE group_id = ? AND status = 'active'", [groupId], () => {});
+      io.to(groupId).emit('bill_session_closed', data);
       console.log(`🏁 Live bill session closed in group ${groupId}`);
     }
   });

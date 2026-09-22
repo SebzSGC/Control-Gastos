@@ -140,6 +140,9 @@ export default function Dashboard() {
         setProfiles(data.profiles || []);
         setExpenses(data.expenses || []);
         setBills(data.bills || []);
+        if (data.activeBillSession && data.activeBillSession.host_profile_id !== me.id) {
+          setActiveLiveBill(data.activeBillSession);
+        }
 
         const currentMe = (data.profiles || []).find(p => p.id === me.id);
         if (currentMe) {
@@ -196,10 +199,10 @@ export default function Dashboard() {
       }
     });
 
-    newSocket.on('bill_item_claimed', (data) => {
+    const handleLiveClaimUpdate = (data) => {
       setActiveLiveBill(prev => {
         if (!prev) return prev;
-        const currentClaims = prev.initialClaims || {};
+        const currentClaims = prev.initialClaims || prev.assignments || {};
         const curList = currentClaims[data.itemId] || [];
         const updatedList = data.selected
           ? (curList.includes(data.profileId) ? curList : [...curList, data.profileId])
@@ -209,10 +212,17 @@ export default function Dashboard() {
           initialClaims: {
             ...currentClaims,
             [data.itemId]: updatedList
+          },
+          assignments: {
+            ...currentClaims,
+            [data.itemId]: updatedList
           }
         };
       });
-    });
+    };
+
+    newSocket.on('bill_item_claimed', handleLiveClaimUpdate);
+    newSocket.on('bill_assignments_updated', handleLiveClaimUpdate);
 
     newSocket.on('bill_session_closed', () => {
       setActiveLiveBill(null);

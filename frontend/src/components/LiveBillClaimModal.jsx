@@ -54,9 +54,11 @@ export default function LiveBillClaimModal({
     };
 
     socket.on('bill_item_claimed', handlePeerClaim);
+    socket.on('bill_assignments_updated', handlePeerClaim);
 
     return () => {
       socket.off('bill_item_claimed', handlePeerClaim);
+      socket.off('bill_assignments_updated', handlePeerClaim);
     };
   }, [socket, isOpen, currentProfile, showToast]);
 
@@ -84,15 +86,19 @@ export default function LiveBillClaimModal({
 
     // Broadcast through socket to host and all room peers
     if (socket && liveBill?.groupId) {
-      socket.emit('bill_item_claimed', {
+      const claimPayload = {
         groupId: liveBill.groupId,
+        group_id: liveBill.groupId,
+        sessionId: liveBill.sessionId || liveBill.id,
         billId: liveBill.billId,
         itemId: item.id,
         itemName: item.name,
         profileId: currentProfile.id,
         profileName: currentProfile.name,
         selected: nextSelected
-      });
+      };
+      socket.emit('bill_item_claimed', claimPayload);
+      socket.emit('toggle_bill_item', claimPayload);
     }
   };
 

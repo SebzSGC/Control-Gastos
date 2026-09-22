@@ -81,8 +81,10 @@ export default function BillSplitterModal({
     };
 
     socket.on('bill_item_claimed', handlePeerClaim);
+    socket.on('bill_assignments_updated', handlePeerClaim);
     return () => {
       socket.off('bill_item_claimed', handlePeerClaim);
+      socket.off('bill_assignments_updated', handlePeerClaim);
     };
   }, [socket, currentProfile, showToast]);
 
@@ -360,8 +362,20 @@ export default function BillSplitterModal({
       discount: Number(discount) || 0,
       totalAmount: invoiceTotal,
       taxDistribution,
-      initialClaims: assignments
+      initialClaims: assignments,
+      assignments
     };
+
+    // Persist live session in database on server and broadcast to room
+    try {
+      fetch(`${API_URL}/bill-sessions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(liveData)
+      }).catch(err => console.warn('Live session REST sync warning:', err));
+    } catch (e) {
+      console.warn(e);
+    }
 
     if (socket) {
       socket.emit('start_bill_session', liveData);
