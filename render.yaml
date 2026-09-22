@@ -1,0 +1,33 @@
+# ==============================================================================
+# PaySync - Render Blueprint (render.yaml)
+# ==============================================================================
+# Despliegue en Render con persistencia de SQLite y Health Check
+# ==============================================================================
+
+services:
+  # Opción A: Servicio Web Fullstack Unificado (Recomendado para PaySync)
+  - type: web
+    name: paysync-app
+    runtime: node
+    plan: starter
+    region: oregon
+    buildCommand: npm run install:all && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    disk:
+      name: paysync-db-disk
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_PATH
+        value: /data/app_data.db
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: GEMINI_API_KEY
+        sync: false # Configurar manualmente en el Dashboard de Render
+      - key: OPENAI_API_KEY
+        sync: false

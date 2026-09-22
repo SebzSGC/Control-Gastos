@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+
+# Dependencies
+node_modules
+frontend/node_modules
+backend/node_modules
+
+# Build artifacts and caches
+dist
+frontend/dist
+.npm
+.cache
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Local SQLite databases (don't bake host DB into image)
+*.db
+*.db-journal
+*.db-wal
+*.sqlite3
+backend/app_data.db
+backend/paysync.db
+
+# Uploads
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# IDE and OS
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+*.log

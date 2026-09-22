@@ -1,0 +1,78 @@
+# 🚀 Plan de Despliegue en Producción Cloud (Zero-Cost & Free-Tier)
+
+**Rol:** Orquestador Principal  
+**Estado:** Secuencia de Ejecución Automatizada en Marcha  
+**Objetivo:** Desplegar PaySync en la nube pública de forma 100% gratuita, sin tarjeta de crédito obligatoria, con alta resiliencia y cero riesgo de facturación.
+
+---
+
+## 🗺️ Secuencia de Ejecución de Subagentes
+
+```mermaid
+flowchart TD
+    subgraph S1 ["Paso 1: Infraestructura & Seguridad"]
+        DevOps["🚀 Subagente DEVOPS<br/>• .gitignore raíz y backend<br/>• render.yaml & vercel.json<br/>• Dockerfile & docker-compose.yml<br/>• DEPLOYMENT.md"]
+    end
+
+    subgraph S2 ["Paso 2: Servidor en Producción"]
+        Backend["🛠️ Subagente BACKEND<br/>• npm start en package.json<br/>• Health check /api/health<br/>• CORS dinámico (CORS_ORIGIN)<br/>• DB_PATH parametrizado & Cierre limpio"]
+    end
+
+    subgraph S3 ["Paso 3: Cliente Desacoplado"]
+        Frontend["🎨 Subagente FRONTEND<br/>• Centralización en src/config.js<br/>• Variables VITE_API_URL y VITE_SOCKET_URL<br/>• Detección de Cold-Start en Render<br/>• Build estático para CDN"]
+    end
+
+    subgraph S4 ["Paso 4: Auditoría de Calidad"]
+        QA["🧪 Subagente QA<br/>• Auditoría de secretos y .gitignore<br/>• Compilación npm run build<br/>• Certificación de Cero Costes"]
+    end
+
+    DevOps --> Backend
+    Backend --> Frontend
+    Frontend --> QA
+```
+
+---
+
+## 🚀 PASO 1: Despacho a Subagente `devops`
+
+@devops
+
+### 📌 [MISIÓN DEVOPS: INFRAESTRUCTURA Y CONFIGURACIONES DE DESPLIEGUE]
+
+**Objetivo:** Crear los artefactos de configuración para desplegar el frontend en **Vercel** y el backend en **Render**, protegiendo el repositorio contra fugas de datos y asegurando cero costes.
+
+#### Archivos que debes crear/actualizar:
+
+#### 1. Archivo [`.gitignore`](file:///c:/Users/gomezc/Desktop/Follow-Susbcriptions/.gitignore) (en la raíz del proyecto)
+```gitignore
+# Dependencias
+node_modules/
+*/node_modules/
+
+# Compilados de producción
+dist/
+*/d
+<truncated 7812 bytes>
+`npm run build` en `frontend/` compile con éxito.
+   - Comprobar que `node --check server.js` en `backend/` no presente errores de sintaxis.
+2. **Auditoría de Seguridad de Repositorio:**
+   - Certificar que [`.gitignore`](file:///c:/Users/gomezc/Desktop/Follow-Susbcriptions/.gitignore) bloquee `*.db`, `.env`, y carpetas de `uploads/`.
+   - Certificar que no existan API keys ni tokens hardcodeados en el código fuente.
+3. **Auditoría de Despliegue:**
+   - Verificar la coherencia entre [`frontend/vercel.json`](file:///c:/Users/gomezc/Desktop/Follow-Susbcriptions/frontend/vercel.json), [`backend/render.yaml`](file:///c:/Users/gomezc/Desktop/Follow-Susbcriptions/backend/render.yaml) y las variables de entorno documentadas en [`DEPLOYMENT.md`](file:///c:/Users/gomezc/Desktop/Follow-Susbcriptions/DEPLOYMENT.md).
+
+---
+
+## 📊 Matriz de Control de Costos y Free Tier
+
+| Proveedor | Servicio | Uso en PaySync | Límite Gratuito | Riesgo de Costo |
+| :--- | :--- | :--- | :--- | :--- |
+| **Vercel** | Hosting SPA Frontend | Servir archivos HTML/JS/CSS | 100 GB ancho de banda/mes | **Nulo ($0)**. Sin tarjeta requerida. Si supera el límite, se detiene sin cobrar. |
+| **Render** | Free Web Service | API Node.js Express + Socket.IO | 750 horas/mes (24/7 para 1 app) | **Nulo ($0)**. Sin tarjeta requerida. Entra en sleep tras 15m de inactividad. |
+| **Google AI Studio** | Gemini 1.5/2.0 Flash | Visión OCR de tickets de compra | 1,500 peticiones/día (15 RPM) | **Nulo ($0)**. No requiere tarjeta. Si excede cuota devuelve 429 sin cobro. |
+| **Tesseract.js** | OCR Fallback local | Reconocimiento alternativo | Ilimitado (corre en CPU local) | **Nulo ($0)**. Código abierto sin costes. |
+
+---
+
+### 🚦 Ejecución en Progreso
+Cada subagente tiene asignadas sus tareas específicas sin solapamiento. Puedes alternar al subagente deseado (**`devops`**, **`backend`**, **`frontend`**, **`qa`**) en el desplegable de Antigravity o en la terminal con `agy --agent <nombre>`. Estaré supervisando cada paso hasta certificar la entrega completa.

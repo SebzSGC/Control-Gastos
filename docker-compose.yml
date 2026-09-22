@@ -1,0 +1,38 @@
+# ==============================================================================
+# PaySync - Production Docker Compose Configuration
+# ==============================================================================
+# Usage:
+#   docker compose up -d --build
+# ==============================================================================
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: paysync_app
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3001}:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_PATH=/app/data/app_data.db
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - paysync_data:/app/data
+      - paysync_uploads:/app/backend/uploads
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  paysync_data:
+    driver: local
+  paysync_uploads:
+    driver: local
