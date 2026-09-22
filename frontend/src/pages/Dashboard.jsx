@@ -15,6 +15,7 @@ import {
 import Navbar from '../components/Navbar';
 import DigitalCard from '../components/DigitalCard';
 import BillSplitterModal from '../components/BillSplitterModal';
+import LiveBillClaimModal from '../components/LiveBillClaimModal';
 import { useToast } from '../context/ToastContext';
 import { useTheme } from '../context/ThemeContext';
 import { API_URL, SOCKET_URL } from '../config/api';
@@ -64,6 +65,11 @@ export default function Dashboard() {
   const [isConnected, setIsConnected] = useState(false);
   const [loading, setLoading] = useState(true);
   const [slowLoad, setSlowLoad] = useState(false);
+
+  // Live Bill Session states
+  const [socket, setSocket] = useState(null);
+  const [activeLiveBill, setActiveLiveBill] = useState(null);
+  const [showLiveClaimModal, setShowLiveClaimModal] = useState(false);
 
   // Bill Splitting Modals
   const [showBillModal, setShowBillModal] = useState(false);
@@ -165,6 +171,7 @@ export default function Dashboard() {
 
     newSocket.on('connect', () => {
       setIsConnected(true);
+      setSocket(newSocket);
       newSocket.emit('join_group', id);
 
       // Notify group peers if joined via NFC Tap-to-Join
@@ -181,6 +188,37 @@ export default function Dashboard() {
       toast.success(data?.message || '¡Un compañero se unió mediante NFC! 📡');
     });
 
+    // Real-time Live Bill Split events
+    newSocket.on('bill_session_started', (data) => {
+      if (data && data.hostProfileId !== me?.id) {
+        setActiveLiveBill(data);
+        toast.info(`🧾 Cuenta Abierta en Vivo: ${data.hostName} subió la factura de "${data.storeName}". Toca aquí para marcar tus consumos.`);
+      }
+    });
+
+    newSocket.on('bill_item_claimed', (data) => {
+      setActiveLiveBill(prev => {
+        if (!prev) return prev;
+        const currentClaims = prev.initialClaims || {};
+        const curList = currentClaims[data.itemId] || [];
+        const updatedList = data.selected
+          ? (curList.includes(data.profileId) ? curList : [...curList, data.profileId])
+          : curList.filter(id => id !== data.profileId);
+        return {
+          ...prev,
+          initialClaims: {
+            ...currentClaims,
+            [data.itemId]: updatedList
+          }
+        };
+      });
+    });
+
+    newSocket.on('bill_session_closed', () => {
+      setActiveLiveBill(null);
+      setShowLiveClaimModal(false);
+    });
+
     newSocket.on('expense_added', (newExpense) => {
       setExpenses(prev => [newExpense, ...prev]);
       fetchSettlements();
@@ -190,6 +228,8 @@ export default function Dashboard() {
     newSocket.on('bill_added', (newBill) => {
       setBills(prev => [newBill, ...prev]);
       fetchSettlements();
+      setActiveLiveBill(null);
+      setShowLiveClaimModal(false);
       toast.success(`Nueva factura registrada: ${newBill.description} (${formatCOP(newBill.total_amount)})`);
     });
 
@@ -215,6 +255,7 @@ export default function Dashboard() {
 
     return () => {
       newSocket.disconnect();
+      setSocket(null);
     };
   }, [id, me, navigate, toast, fetchSettlements]);
 
@@ -516,6 +557,43 @@ export default function Dashboard() {
 
       <main className="container animate-fade-in" style={{ padding: '1.5rem 1rem 3rem' }}>
         
+        {/* Real-time Live Bill Alert Banner */}
+        {activeLiveBill && (
+          <div 
+            className="live-bill-alert-banner animate-fade-in"
+            onClick={() => setShowLiveClaimModal(true)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowLiveClaimModal(true); }}
+            title="Toca para marcar tus consumos en vivo"
+          >
+            <div className="live-bill-badge-pulse">
+              <span className="live-pulse-dot"></span>
+              <span>EN VIVO</span>
+            </div>
+            <div className="live-bill-text-wrap">
+              <div className="live-bill-title">
+                🧾 Cuenta Abierta en Vivo: <strong>{activeLiveBill.hostName}</strong> subió la factura de <strong>"{activeLiveBill.storeName}"</strong>. Toca aquí para marcar tus consumos.
+              </div>
+              <div className="live-bill-subtitle">
+                Los demás integrantes están seleccionando sus platos en tiempo real.
+              </div>
+            </div>
+            <div className="live-bill-action">
+              <button 
+                type="button" 
+                className="btn-primary btn-sm btn-nfc-join"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowLiveClaimModal(true);
+                }}
+              >
+                Marcar lo Mío <ArrowRight size={14} />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Top Greeting & Action Banner */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
           <div>
@@ -1381,6 +1459,7 @@ export default function Dashboard() {
             groupId={id}
             profiles={profiles}
             currentProfile={me}
+            socket={socket}
             onClose={() => setShowBillModal(false)}
             onSuccess={(newBill) => {
               setBills(prev => [newBill, ...prev]);
@@ -1388,6 +1467,17 @@ export default function Dashboard() {
             }}
           />
         )}
+
+        {/* Modal: Live Bill Real-time Dish Claiming */}
+        <LiveBillClaimModal
+          key={activeLiveBill?.sessionId || 'live-claim-modal'}
+          isOpen={showLiveClaimModal}
+          onClose={() => setShowLiveClaimModal(false)}
+          liveBill={activeLiveBill}
+          currentProfile={me}
+          profiles={profiles}
+          socket={socket}
+        />
 
         {/* Modal: View Itemized Bill Details */}
         {viewingBill && (

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { 
   Upload, ImagePlus, Check, Plus, Trash2, ArrowRight, ArrowLeft, 
   Sparkles, AlertTriangle, Receipt, Loader2, X,
-  RotateCw, Key, Cpu, ExternalLink, Eye, EyeOff
+  RotateCw, Key, Cpu, ExternalLink, Eye, EyeOff, Radio
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { API_URL } from '../config/api';
@@ -20,7 +20,8 @@ export default function BillSplitterModal({
   profiles = [], 
   currentProfile = null, 
   onClose, 
-  onSuccess 
+  onSuccess,
+  socket = null
 }) {
   const { showToast } = useToast();
   const fileInputRef = useRef(null);
@@ -31,6 +32,7 @@ export default function BillSplitterModal({
   const [imagePreview, setImagePreview] = useState(null);
   const [rawFile, setRawFile] = useState(null);
   const [rotation, setRotation] = useState(0);
+  const [isLiveSessionActive, setIsLiveSessionActive] = useState(false);
 
   // AI & Vision Agent Configuration
   const [geminiKey, setGeminiKey] = useState(() => localStorage.getItem('paysync_gemini_key') || '');
@@ -54,6 +56,35 @@ export default function BillSplitterModal({
 
   // Assignment state: map of itemId -> array of profileIds [profileId1, profileId2]
   const [assignments, setAssignments] = useState({});
+
+  // Sync real-time claims from peers when session is live or modal is open
+  useEffect(() => {
+    if (!socket) return;
+
+    const handlePeerClaim = (data) => {
+      if (data?.itemId && data?.profileId) {
+        setAssignments(prev => {
+          const current = prev[data.itemId] || [];
+          const exists = current.includes(data.profileId);
+          if (data.selected && !exists) {
+            return { ...prev, [data.itemId]: [...current, data.profileId] };
+          } else if (!data.selected && exists) {
+            return { ...prev, [data.itemId]: current.filter(id => id !== data.profileId) };
+          }
+          return prev;
+        });
+
+        if (data.profileId !== currentProfile?.id) {
+          showToast(`🍽️ ${data.profileName || 'Un integrante'} marcó: ${data.itemName || 'un plato'}`, 'info');
+        }
+      }
+    };
+
+    socket.on('bill_item_claimed', handlePeerClaim);
+    return () => {
+      socket.off('bill_item_claimed', handlePeerClaim);
+    };
+  }, [socket, currentProfile, showToast]);
 
   // Check if server already has an environment API Key configured
   useEffect(() => {
@@ -299,6 +330,55 @@ export default function BillSplitterModal({
 
   const { shares, totalAssignedSubtotal, totalAssignedWithExtras, pendingAmount } = calculateParticipantShares();
 
+  // Start real-time live session with room participants
+  const handleStartLiveSession = () => {
+    if (items.length === 0) {
+      showToast('Debes tener al menos un producto en la lista', 'warning');
+      return;
+    }
+
+    const hostProfile = profiles.find(p => p.id === payerId) || currentProfile;
+    const hostName = hostProfile?.name || 'Un integrante';
+    const storeName = detectedStore || (description ? description.replace(/^Consumo en\s*/i, '') : 'Factura compartida');
+
+    const liveData = {
+      sessionId: `live-bill-${Date.now()}`,
+      groupId,
+      hostProfileId: payerId || currentProfile?.id,
+      hostName,
+      storeName,
+      description: description || `Factura de ${storeName}`,
+      items: items.map(it => ({
+        id: it.id,
+        name: it.name,
+        quantity: it.quantity,
+        unitPrice: it.unitPrice,
+        subtotal: it.subtotal
+      })),
+      tax: Number(tax) || 0,
+      tip: Number(tip) || 0,
+      discount: Number(discount) || 0,
+      totalAmount: invoiceTotal,
+      taxDistribution,
+      initialClaims: assignments
+    };
+
+    if (socket) {
+      socket.emit('start_bill_session', liveData);
+      socket.emit('bill_session_started', liveData);
+    }
+    setIsLiveSessionActive(true);
+    showToast('📡 ¡Reparto en vivo activado! Notificación enviada al grupo.', 'success');
+    setStep(3); // Advance directly to assignment step
+  };
+
+  const handleCloseModal = () => {
+    if (isLiveSessionActive && socket && groupId) {
+      socket.emit('bill_session_closed', { groupId });
+    }
+    onClose();
+  };
+
   // STEP 4: Finalize and commit bill
   const handleFinalizeBill = async () => {
     if (!payerId) {
@@ -350,6 +430,9 @@ export default function BillSplitterModal({
       }
 
       showToast('¡Factura desglosada y repartida con éxito!', 'success');
+      if (socket && groupId) {
+        socket.emit('bill_session_closed', { groupId });
+      }
       if (onSuccess) onSuccess(data.bill);
       onClose();
     } catch (err) {
@@ -363,7 +446,7 @@ export default function BillSplitterModal({
   const isAiActive = !!(geminiKey || hasServerKey);
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop" onClick={handleCloseModal}>
       <div className="modal-container modal-wide animate-scale-up" onClick={e => e.stopPropagation()}>
         
         {/* Header */}
@@ -377,7 +460,7 @@ export default function BillSplitterModal({
               <p className="modal-subtitle">Escaneo inteligente con IA Multimodal, ajuste de platos y reparto equitativo</p>
             </div>
           </div>
-          <button className="btn-icon-subtle" onClick={onClose} aria-label="Cerrar modal">
+          <button className="btn-icon-subtle" onClick={handleCloseModal} aria-label="Cerrar modal">
             <X size={20} />
           </button>
         </div>
@@ -562,9 +645,19 @@ export default function BillSplitterModal({
                     Verifica que los productos, cantidades y precios coincidan con la cuenta. Puedes editar cualquier fila.
                   </p>
                 </div>
-                <button type="button" className="btn-secondary btn-sm" onClick={handleAddItem}>
-                  <Plus size={14} /> Agregar Producto
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <button 
+                    type="button" 
+                    className="btn-primary btn-sm btn-nfc-join" 
+                    onClick={handleStartLiveSession}
+                    title="Transmitir la cuenta a todos los teléfonos del grupo en tiempo real"
+                  >
+                    <Radio size={14} className="pulse-icon" /> 📡 Repartir en Vivo con el Grupo
+                  </button>
+                  <button type="button" className="btn-secondary btn-sm" onClick={handleAddItem}>
+                    <Plus size={14} /> Agregar Producto
+                  </button>
+                </div>
               </div>
 
               {/* Items Table */}
@@ -724,6 +817,31 @@ export default function BillSplitterModal({
                   </div>
                 </div>
               </div>
+
+              {/* Live Session Active Alert */}
+              {isLiveSessionActive && (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0.75rem 1.1rem',
+                  borderRadius: 'var(--radius-lg)',
+                  background: 'rgba(99, 102, 241, 0.12)',
+                  border: '1.5px solid rgba(99, 102, 241, 0.35)',
+                  marginBottom: '1.25rem',
+                  boxShadow: '0 4px 15px rgba(99, 102, 241, 0.15)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                    <span className="live-pulse-dot" style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#06b6d4', boxShadow: '0 0 10px #06b6d4' }}></span>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                      📡 Sesión en Vivo Activa: Los participantes marcan sus platos desde sus teléfonos en tiempo real.
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-mint)', background: 'rgba(16, 185, 129, 0.15)', padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-pill)' }}>
+                    Sincronizando
+                  </span>
+                </div>
+              )}
 
               {/* Items assignment list */}
               <div className="items-assignment-list">
@@ -942,8 +1060,19 @@ export default function BillSplitterModal({
               <ArrowLeft size={16} /> Volver
             </button>
           ) : (
-            <button type="button" className="btn-secondary" onClick={onClose} disabled={isProcessing}>
+            <button type="button" className="btn-secondary" onClick={handleCloseModal} disabled={isProcessing}>
               Cancelar
+            </button>
+          )}
+
+          {step === 2 && (
+            <button 
+              type="button" 
+              className="btn-primary btn-nfc-join" 
+              onClick={handleStartLiveSession}
+              style={{ marginRight: 'auto' }}
+            >
+              <Radio size={16} /> 📡 Repartir en Vivo con el Grupo
             </button>
           )}
 

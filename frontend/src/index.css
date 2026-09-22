@@ -1977,3 +1977,92 @@ body {
   margin: auto;
   position: relative;
 }
+
+/* ================= LIVE BILL SPLITTING IN REAL-TIME ================= */
+.live-bill-alert-banner {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(99, 102, 241, 0.18) 100%);
+  border: 1.5px solid rgba(6, 182, 212, 0.45);
+  border-radius: var(--radius-xl);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: 0 8px 30px -5px rgba(6, 182, 212, 0.25), 0 0 0 1px rgba(99, 102, 241, 0.2);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.live-bill-alert-banner:hover {
+  transform: translateY(-2px);
+  border-color: #06b6d4;
+  box-shadow: 0 12px 35px -5px rgba(6, 182, 212, 0.35), 0 0 0 1px rgba(99, 102, 241, 0.4);
+}
+
+.live-bill-badge-pulse {
+  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+  color: #ffffff;
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.6);
+  flex-shrink: 0;
+}
+
+.live-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffffff;
+  animation: ripplePulse 1.4s infinite;
+}
+
+.live-bill-text-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.live-bill-title {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+
+.live-bill-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.live-bill-action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .live-bill-alert-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+  .live-bill-action {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .live-bill-action > button:first-child {
+    flex: 1;
+  }
+}

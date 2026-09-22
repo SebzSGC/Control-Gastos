@@ -998,6 +998,38 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('start_bill_session', (data) => {
+    const groupId = sanitizeGroupId(data?.groupId);
+    if (groupId) {
+      socket.to(groupId).emit('bill_session_started', data);
+      console.log(`🧾 Live bill session started in group ${groupId} by ${data.hostName}`);
+    }
+  });
+
+  socket.on('bill_session_started', (data) => {
+    const groupId = sanitizeGroupId(data?.groupId);
+    if (groupId) {
+      socket.to(groupId).emit('bill_session_started', data);
+      console.log(`🧾 Live bill session broadcast in group ${groupId}`);
+    }
+  });
+
+  socket.on('bill_item_claimed', (data) => {
+    const groupId = sanitizeGroupId(data?.groupId);
+    if (groupId) {
+      socket.to(groupId).emit('bill_item_claimed', data);
+      console.log(`🍽️ Bill item claim relayed in group ${groupId} for item ${data.itemId}`);
+    }
+  });
+
+  socket.on('bill_session_closed', (data) => {
+    const groupId = sanitizeGroupId(data?.groupId);
+    if (groupId) {
+      socket.to(groupId).emit('bill_session_closed', data);
+      console.log(`🏁 Live bill session closed in group ${groupId}`);
+    }
+  });
+
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
   });
