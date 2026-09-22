@@ -4,7 +4,7 @@
   "description": "PaySync - Sistema Inteligente de Gestión y División de Gastos en Grupo con Visión AI y NFC",
   "private": true,
   "scripts": {
-    "install:all": "npm install --prefix backend && npm install --prefix frontend --include=dev",
+    "install:all": "npm install --prefix backend && npm install --prefix frontend --include=dev && node scripts/ensure-rolldown.js",
     "build": "npm run build --prefix frontend",
     "start": "node backend/server.js",
     "start:backend": "npm start --prefix backend",
