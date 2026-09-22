@@ -1006,6 +1006,25 @@ export default function BillSplitterModal({
                   Al activar Google Gemini, un Agente de Visión leerá tus facturas directamente como si fuera una persona, identificando nombres exactos de platos, cantidades y evitando errores de cálculo.
                 </p>
 
+                {hasServerKey && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.6rem',
+                    padding: '0.65rem 0.85rem',
+                    borderRadius: 'var(--radius-md)',
+                    background: 'rgba(16, 185, 129, 0.1)',
+                    border: '1px solid rgba(16, 185, 129, 0.3)',
+                    fontSize: '0.82rem',
+                    color: 'var(--accent-mint)'
+                  }}>
+                    <Check size={16} />
+                    <span>
+                      <strong>¡Clave de Servidor Activa!</strong> Ya tienes configurada la clave en Render. Todas las facturas se procesan con IA de forma automática. Solo ingresa una clave aquí si deseas sobreescribirla con una cuenta personal distinta.
+                    </span>
+                  </div>
+                )}
+
                 <div>
                   <label className="input-label">Clave de API de Gemini (Google AI Studio)</label>
                   <div className="input-with-addons">
