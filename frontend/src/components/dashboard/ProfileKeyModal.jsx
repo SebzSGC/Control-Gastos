@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { X, UploadCloud, Trash2, Info, CheckCircle2 } from 'lucide-react';
+import { X, UploadCloud, Trash2, CheckCircle2 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { API_URL, getUploadUrl } from '../../config/api';
 
@@ -130,232 +130,161 @@ function ProfileKeyDialog({
       <div
         className="modal-container animate-toast-in modal-profile-key"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: '520px' }}
       >
         <div className="sheet-drag-handle" />
-        <div className="modal-header">
+
+        {/* Modal Header */}
+        <div className="modal-profile-header">
           <div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', margin: 0 }}>
+            <h3 className="modal-profile-title">
               Mi Perfil y Llave Bre-B
             </h3>
-            <p className="text-subtle" style={{ margin: '0.2rem 0 0 0', fontSize: '0.82rem' }}>
-              Configura tu nombre, llave de pago y código QR oficial para recibir transferencias.
+            <p className="modal-profile-subtitle">
+              Configura tu identificación y código QR para recibir pagos.
             </p>
           </div>
-          <button type="button" className="modal-close-btn active:scale-[0.98]" onClick={onClose}>
+          <button
+            type="button"
+            className="modal-close-btn active:scale-[0.98]"
+            onClick={onClose}
+            aria-label="Cerrar modal"
+          >
             <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          {/* Input: Tu Nombre */}
-          <div>
-            <label className="input-label" htmlFor="profile-name-input">
-              Tu Nombre
-            </label>
-            <input
-              id="profile-name-input"
-              type="text"
-              className="glass-input"
-              value={profileName}
-              onChange={(e) => setProfileName(e.target.value)}
-              placeholder="Nombre visible en el grupo"
-              required
-            />
-          </div>
+        {/* Formulario envolvente con Body scrolleable y Footer fijo */}
+        <form onSubmit={handleSubmit} className="modal-profile-form">
+          {/* Modal Body */}
+          <div className="modal-profile-body">
+            {/* Grid 2 columnas: Tu Nombre y Llave Bre-B */}
+            <div className="profile-key-grid">
+              <div className="profile-key-field">
+                <label className="input-label" htmlFor="profile-name-input">
+                  Tu Nombre
+                </label>
+                <input
+                  id="profile-name-input"
+                  type="text"
+                  className="glass-input"
+                  value={profileName}
+                  onChange={(e) => setProfileName(e.target.value)}
+                  placeholder="Nombre visible en el grupo"
+                  required
+                />
+              </div>
 
-          {/* Input: Llave Bre-B (Celular o Cédula) */}
-          <div>
-            <label className="input-label" htmlFor="payment-key-input">
-              Llave Bre-B (Celular o Cédula)
-            </label>
-            <input
-              id="payment-key-input"
-              type="text"
-              className="glass-input num-tabular"
-              value={paymentKey}
-              onChange={(e) => setPaymentKey(e.target.value)}
-              placeholder="Ej. Celular 3001234567 o Cédula"
-            />
-            <span className="text-subtle" style={{ display: 'block', marginTop: '0.35rem', fontSize: '0.78rem' }}>
-              Opcional si subes QR, para quienes prefieran transferir por número.
-            </span>
-          </div>
-
-          {/* Sección: Código QR Bre-B Oficial */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <label className="input-label" style={{ margin: 0 }}>
-              Código QR Bre-B Oficial
-            </label>
-
-            <div
-              style={{
-                display: 'flex',
-                gap: '0.75rem',
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-md)',
-                padding: '0.85rem 1rem',
-                alignItems: 'flex-start',
-              }}
-            >
-              <Info size={18} style={{ color: 'var(--brand-primary)', flexShrink: 0, marginTop: '2px' }} />
-              <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: '1.45', color: 'var(--text-secondary)' }}>
-                Descarga la imagen oficial de tu código QR desde tu app bancaria (Bancolombia, Nequi, Daviplata o Bre-B) y súbela aquí para que la lean al instante sin errores.
-              </p>
+              <div className="profile-key-field">
+                <label className="input-label" htmlFor="payment-key-input">
+                  Llave Bre-B (Celular o Cédula)
+                </label>
+                <input
+                  id="payment-key-input"
+                  type="text"
+                  className="glass-input num-tabular"
+                  value={paymentKey}
+                  onChange={(e) => setPaymentKey(e.target.value)}
+                  placeholder="Ej. 3001234567"
+                />
+              </div>
             </div>
 
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              style={{ display: 'none' }}
-              onChange={(e) => handleFileChange(e.target.files?.[0])}
-            />
+            {/* Sección Código QR Bre-B Oficial */}
+            <div className="profile-qr-section">
+              <div className="profile-qr-header">
+                <label className="input-label" style={{ margin: 0 }}>
+                  Código QR Bre-B Oficial
+                </label>
+                <p className="profile-qr-desc">
+                  Sube la captura oficial de tu app bancaria para recibir transferencias sin errores.
+                </p>
+              </div>
 
-            {uploadedPreview ? (
-              <div
-                className="uploaded-qr-preview-box"
-                style={{
-                  background: 'var(--bg-surface)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-lg)',
-                  padding: '1.25rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '1rem',
-                }}
-              >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                style={{ display: 'none' }}
+                onChange={(e) => handleFileChange(e.target.files?.[0])}
+              />
+
+              {uploadedPreview ? (
+                <div className="qr-preview-compact-card">
+                  {/* Tarjeta blanca de contraste con miniatura */}
+                  <div className="qr-thumbnail-box">
+                    <img
+                      src={uploadedPreview}
+                      alt="Vista previa QR oficial"
+                      className="qr-thumbnail-img"
+                    />
+                  </div>
+
+                  {/* Estado y botones de acción en fila */}
+                  <div className="qr-preview-info">
+                    <div className="qr-badge-pill">
+                      <CheckCircle2 size={13} />
+                      <span>QR Oficial cargado</span>
+                    </div>
+                    <div className="qr-preview-actions">
+                      <button
+                        type="button"
+                        className="btn-secondary qr-action-btn active:scale-[0.98]"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <UploadCloud size={14} />
+                        <span>Cambiar imagen</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-danger qr-action-btn qr-remove-btn active:scale-[0.98]"
+                        onClick={handleRemoveImage}
+                        title="Quitar imagen"
+                      >
+                        <Trash2 size={14} />
+                        <span>Quitar</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
                 <div
-                  style={{
-                    background: '#ffffff',
-                    padding: '10px',
-                    borderRadius: '16px',
-                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
-                    maxHeight: '260px',
-                    maxWidth: '100%',
-                    width: 'fit-content',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                  className={`qr-dropzone-compact ${isDragging ? 'dragging' : ''}`}
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                  }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDragging(false);
+                    if (e.dataTransfer.files?.[0]) {
+                      handleFileChange(e.dataTransfer.files[0]);
+                    }
                   }}
                 >
-                  <img
-                    src={uploadedPreview}
-                    alt="Vista previa QR oficial"
-                    style={{
-                      maxHeight: '240px',
-                      maxWidth: '100%',
-                      width: 'auto',
-                      height: 'auto',
-                      objectFit: 'contain',
-                      borderRadius: '8px',
-                      display: 'block',
-                    }}
-                  />
+                  <div className="qr-dropzone-icon">
+                    <UploadCloud size={20} />
+                  </div>
+                  <div className="qr-dropzone-text">
+                    <span className="qr-dropzone-title">
+                      Selecciona o arrastra la imagen de tu QR
+                    </span>
+                    <span className="qr-dropzone-sub">
+                      Capturas de Bancolombia, Nequi, Daviplata o Bre-B (hasta 5MB)
+                    </span>
+                  </div>
                 </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78rem', color: 'var(--accent-mint)' }}>
-                  <CheckCircle2 size={15} />
-                  <span style={{ fontWeight: '600' }}>Imagen de QR lista para guardar</span>
-                </div>
-
-                <div style={{ display: 'flex', gap: '0.6rem', width: '100%' }}>
-                  <button
-                    type="button"
-                    className="btn-secondary active:scale-[0.98]"
-                    onClick={() => fileInputRef.current?.click()}
-                    style={{ flex: 1, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}
-                  >
-                    <UploadCloud size={15} /> Cambiar Imagen
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-danger active:scale-[0.98]"
-                    onClick={handleRemoveImage}
-                    style={{
-                      padding: '0.6rem 0.85rem',
-                      fontSize: '0.85rem',
-                      borderRadius: 'var(--radius-md)',
-                      border: '1px solid var(--danger-glow)',
-                      background: 'var(--danger-bg)',
-                      color: 'var(--danger)',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                    title="Eliminar QR"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div
-                className={`qr-dropzone ${isDragging ? 'dragging' : ''}`}
-                onClick={() => fileInputRef.current?.click()}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  setIsDragging(true);
-                }}
-                onDragLeave={() => setIsDragging(false)}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  setIsDragging(false);
-                  if (e.dataTransfer.files?.[0]) {
-                    handleFileChange(e.dataTransfer.files[0]);
-                  }
-                }}
-                style={{
-                  border: `2px dashed ${isDragging ? 'var(--brand-primary)' : 'var(--border-subtle)'}`,
-                  borderRadius: 'var(--radius-lg)',
-                  padding: '2rem 1.25rem',
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  background: isDragging ? 'var(--accent-bg)' : 'var(--bg-surface)',
-                  transition: 'all var(--transition-fast)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '0.6rem',
-                }}
-              >
-                <div
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: '50%',
-                    background: 'var(--primary-glow)',
-                    color: 'var(--brand-primary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <UploadCloud size={22} />
-                </div>
-                <div>
-                  <span style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--text-main)', display: 'block' }}>
-                    Selecciona o arrastra la imagen de tu QR
-                  </span>
-                  <span className="text-subtle" style={{ fontSize: '0.78rem', display: 'block', marginTop: '0.2rem' }}>
-                    Capturas oficiales de Bancolombia, Nequi, Daviplata o Bre-B (JPEG, PNG, WebP hasta 5MB)
-                  </span>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
-          {/* Botones de acción */}
-          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+          {/* Modal Footer fijo al pie */}
+          <div className="modal-profile-footer">
             <button
               type="button"
               className="btn-secondary active:scale-[0.98]"
               onClick={onClose}
-              style={{ flex: 1 }}
               disabled={isUpdating}
             >
               Cancelar
@@ -363,7 +292,6 @@ function ProfileKeyDialog({
             <button
               type="submit"
               className="btn-primary active:scale-[0.98]"
-              style={{ flex: 1 }}
               disabled={isUpdating}
             >
               {isUpdating ? 'Guardando...' : 'Guardar Cambios'}

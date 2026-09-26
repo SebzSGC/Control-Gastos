@@ -3077,7 +3077,6 @@ button:active:not(:disabled) {
   }
 
   .voucher-modal-container,
-  .modal-profile-key,
   .modal-container {
     max-width: 100% !important;
     border-bottom-left-radius: 0 !important;
@@ -3107,4 +3106,334 @@ button:active:not(:disabled) {
   to {
     transform: translateY(0);
   }
-}
+}
+
+/* ================= PROFILE & BRE-B KEY MODAL ================= */
+.modal-profile-key {
+  width: 100%;
+  max-width: 500px !important;
+  max-height: min(650px, 88vh) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  margin: auto !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: var(--radius-xl);
+}
+
+.modal-profile-key .sheet-drag-handle {
+  display: none;
+}
+
+.modal-profile-header {
+  padding: 1.2rem 1.35rem 0.95rem 1.35rem;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.modal-profile-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.modal-profile-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0.25rem 0 0 0;
+  line-height: 1.35;
+}
+
+.modal-profile-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.modal-profile-body {
+  padding: 1.15rem 1.35rem;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal-profile-footer {
+  padding: 0.9rem 1.35rem 1.15rem 1.35rem;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.modal-profile-footer button {
+  flex: 1;
+}
+
+/* Fila de campos en grid de 2 columnas en desktop */
+.profile-key-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.profile-key-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.profile-key-field .input-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0;
+}
+
+.profile-key-field .glass-input {
+  font-size: 0.88rem;
+  padding: 0.55rem 0.75rem;
+}
+
+/* Sección Código QR Bre-B Oficial */
+.profile-qr-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profile-qr-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.profile-qr-desc {
+  font-size: 0.78rem;
+  color: var(--text-subtle);
+  margin: 0;
+  line-height: 1.35;
+}
+
+/* Tarjeta horizontal compacta para QR cargado */
+.qr-preview-compact-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 0.75rem 0.9rem;
+}
+
+.qr-thumbnail-box {
+  background: #ffffff;
+  padding: 6px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  height: 110px;
+  width: 110px;
+  overflow: hidden;
+}
+
+.qr-thumbnail-img {
+  max-height: 110px;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 4px;
+  display: block;
+}
+
+.qr-preview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.qr-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--accent-mint);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.qr-badge-pill svg {
+  flex-shrink: 0;
+}
+
+.qr-preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+}
+
+.qr-action-btn {
+  padding: 0.45rem 0.7rem !important;
+  font-size: 0.78rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.35rem !important;
+  border-radius: var(--radius-md) !important;
+  font-weight: 500 !important;
+}
+
+.qr-action-btn.btn-secondary {
+  flex: 1;
+}
+
+.qr-action-btn.btn-danger {
+  padding: 0.45rem 0.75rem !important;
+  color: var(--danger) !important;
+  background: var(--danger-bg) !important;
+  border: 1px solid var(--danger-glow) !important;
+  cursor: pointer;
+}
+
+/* Dropzone compacta cuando no hay imagen cargada */
+.qr-dropzone-compact {
+  border: 2px dashed var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  background: var(--bg-surface);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+}
+
+.qr-dropzone-compact:hover,
+.qr-dropzone-compact.dragging {
+  border-color: var(--brand-primary);
+  background: var(--accent-bg);
+}
+
+.qr-dropzone-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-glow);
+  color: var(--brand-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.qr-dropzone-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  gap: 0.15rem;
+}
+
+.qr-dropzone-title {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.qr-dropzone-sub {
+  font-size: 0.74rem;
+  color: var(--text-subtle);
+}
+
+/* Adaptación responsive para móviles */
+@media (max-width: 640px) {
+  .modal-profile-key {
+    max-width: 100% !important;
+    max-height: 88vh !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-top-left-radius: 20px !important;
+    border-top-right-radius: 20px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    animation: slideUpSheet 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .modal-profile-key .sheet-drag-handle {
+    display: block;
+    width: 36px;
+    height: 4px;
+    background: var(--border-hover);
+    border-radius: var(--radius-full);
+    margin: 0.55rem auto 0 auto;
+  }
+
+  .modal-profile-header {
+    padding: 0.75rem 1.2rem 0.75rem 1.2rem;
+  }
+
+  .modal-profile-body {
+    padding: 1rem 1.2rem;
+  }
+
+  .modal-profile-footer {
+    padding: 0.8rem 1.2rem calc(0.85rem + env(safe-area-inset-bottom, 0px)) 1.2rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .profile-key-grid {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .qr-preview-compact-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0.85rem;
+  }
+
+  .qr-preview-info {
+    align-items: center;
+    width: 100%;
+  }
+
+  .qr-preview-actions {
+    width: 100%;
+  }
+
+  .qr-dropzone-compact {
+    flex-direction: column;
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .qr-dropzone-text {
+    text-align: center;
+  }
+}
+
