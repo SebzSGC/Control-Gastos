@@ -230,11 +230,12 @@ function ProfileKeyDialog({
                 <div
                   style={{
                     background: '#ffffff',
-                    padding: '12px',
+                    padding: '10px',
                     borderRadius: '16px',
                     boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
-                    maxHeight: '190px',
-                    maxWidth: '190px',
+                    maxHeight: '260px',
+                    maxWidth: '100%',
+                    width: 'fit-content',
                     overflow: 'hidden',
                     display: 'flex',
                     alignItems: 'center',
@@ -244,7 +245,15 @@ function ProfileKeyDialog({
                   <img
                     src={uploadedPreview}
                     alt="Vista previa QR oficial"
-                    style={{ maxHeight: '166px', maxWidth: '166px', objectFit: 'contain', borderRadius: '8px' }}
+                    style={{
+                      maxHeight: '240px',
+                      maxWidth: '100%',
+                      width: 'auto',
+                      height: 'auto',
+                      objectFit: 'contain',
+                      borderRadius: '8px',
+                      display: 'block',
+                    }}
                   />
                 </div>
 

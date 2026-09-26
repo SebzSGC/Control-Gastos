@@ -31,6 +31,7 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
   const [activeTab, setActiveTab] = useState(hasQr || !hasKey ? 'qr' : 'card');
   const [copied, setCopied] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
+  const [focusQr, setFocusQr] = useState(false);
 
   if (!profile) return null;
 
@@ -242,25 +243,27 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
                 className="qr-code-plate"
                 style={{
                   background: '#ffffff',
-                  padding: '18px',
-                  borderRadius: '20px',
+                  padding: '14px',
+                  borderRadius: '18px',
                   boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)',
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   position: 'relative',
-                  maxWidth: '220px',
-                  width: '100%',
+                  maxWidth: '100%',
+                  width: 'fit-content',
                 }}
               >
                 <img
                   src={getUploadUrl(profile.payment_qr)}
                   alt={`Código QR Oficial de ${profile.name}`}
                   style={{
-                    width: '184px',
-                    height: '184px',
+                    maxWidth: '100%',
+                    maxHeight: '320px',
+                    width: 'auto',
+                    height: 'auto',
                     objectFit: 'contain',
-                    borderRadius: '8px',
+                    borderRadius: '10px',
                     display: 'block',
                   }}
                 />
@@ -481,7 +484,10 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
       {isZoomed && hasQr && (
         <div
           className="qr-zoom-overlay animate-fade-in"
-          onClick={() => setIsZoomed(false)}
+          onClick={() => {
+            setIsZoomed(false);
+            setFocusQr(false);
+          }}
           style={{
             position: 'fixed',
             inset: 0,
@@ -492,7 +498,7 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1.5rem',
+            padding: '1rem',
           }}
         >
           <div
@@ -501,13 +507,15 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
               background: 'var(--bg-surface)',
               border: '1px solid var(--border-subtle)',
               borderRadius: '24px',
-              padding: '1.75rem 1.5rem',
+              padding: '1.5rem',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '1.1rem',
-              maxWidth: '380px',
-              width: '100%',
+              gap: '0.9rem',
+              maxWidth: '440px',
+              width: '94vw',
+              maxHeight: '94vh',
+              overflowY: 'auto',
               boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
             }}
           >
@@ -532,9 +540,60 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
               <button
                 type="button"
                 className="modal-close-btn active:scale-[0.98]"
-                onClick={() => setIsZoomed(false)}
+                onClick={() => {
+                  setIsZoomed(false);
+                  setFocusQr(false);
+                }}
               >
                 <X size={20} />
+              </button>
+            </div>
+
+            {/* Smart Interactive Switcher Pill in Lightbox */}
+            <div
+              className="qr-lightbox-pill-toggle"
+              style={{
+                display: 'inline-flex',
+                background: 'var(--bg-input)',
+                padding: '0.25rem',
+                borderRadius: 'var(--radius-full)',
+                border: '1px solid var(--border-subtle)',
+                gap: '0.25rem',
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setFocusQr(false)}
+                style={{
+                  padding: '0.35rem 0.85rem',
+                  borderRadius: 'var(--radius-full)',
+                  fontSize: '0.78rem',
+                  fontWeight: '600',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: !focusQr ? 'var(--brand-primary)' : 'transparent',
+                  color: !focusQr ? '#ffffff' : 'var(--text-secondary)',
+                  transition: 'all var(--transition-fast)',
+                }}
+              >
+                Vista Completa
+              </button>
+              <button
+                type="button"
+                onClick={() => setFocusQr(true)}
+                style={{
+                  padding: '0.35rem 0.85rem',
+                  borderRadius: 'var(--radius-full)',
+                  fontSize: '0.78rem',
+                  fontWeight: '600',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: focusQr ? 'var(--brand-primary)' : 'transparent',
+                  color: focusQr ? '#ffffff' : 'var(--text-secondary)',
+                  transition: 'all var(--transition-fast)',
+                }}
+              >
+                Enfocar Código QR
               </button>
             </div>
 
@@ -542,20 +601,33 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
             <div
               style={{
                 background: '#ffffff',
-                padding: '20px',
-                borderRadius: '20px',
+                padding: '14px',
+                borderRadius: '18px',
                 boxShadow: '0 8px 30px rgba(0, 0, 0, 0.25)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                maxWidth: '280px',
-                width: '100%',
+                maxHeight: '68vh',
+                maxWidth: '100%',
+                width: 'auto',
+                overflow: 'hidden',
               }}
             >
               <img
                 src={getUploadUrl(profile.payment_qr)}
                 alt={`Código QR oficial de ${profile.name}`}
-                style={{ width: '240px', height: '240px', objectFit: 'contain', borderRadius: '8px' }}
+                style={{
+                  maxHeight: '60vh',
+                  maxWidth: '100%',
+                  width: 'auto',
+                  height: 'auto',
+                  objectFit: 'contain',
+                  borderRadius: '10px',
+                  display: 'block',
+                  transform: focusQr ? 'scale(1.42)' : 'scale(1)',
+                  transformOrigin: 'center 42%',
+                  transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                }}
               />
             </div>
 
@@ -576,7 +648,10 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
             <button
               type="button"
               className="btn-primary active:scale-[0.98]"
-              onClick={() => setIsZoomed(false)}
+              onClick={() => {
+                setIsZoomed(false);
+                setFocusQr(false);
+              }}
               style={{ width: '100%' }}
             >
               Cerrar Vista Ampliada
