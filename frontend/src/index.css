@@ -2037,6 +2037,48 @@ button:active:not(:disabled) {
   color: var(--text-primary);
 }
 
+/* ================= DASHBOARD HEADER (DESKTOP & TABLET BASE) ================= */
+.dashboard-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.75rem;
+}
+
+.dashboard-greeting-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* Separación clara y elegante de 12px entre botones */
+  flex-wrap: wrap;
+}
+
+.dashboard-action-btn {
+  padding: 0.65rem 1.15rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.dashboard-action-bill {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.dashboard-action-bill:hover:not(:disabled) {
+  border-color: var(--accent-mint);
+  background: rgba(16, 185, 129, 0.08);
+}
+
 /* ================= DESKTOP BREAKPOINT HELPERS ================= */
 @media (min-width: 768px) {
   .md\:hidden {

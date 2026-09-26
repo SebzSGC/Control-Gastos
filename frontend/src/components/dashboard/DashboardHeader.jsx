@@ -55,7 +55,10 @@ export default function DashboardHeader({
         </div>
 
         {/* Desktop Action Buttons (hidden on mobile to give room to the Floating Action Dock) */}
-        <div className="dashboard-action-buttons hidden md:flex">
+        <div
+          className="dashboard-action-buttons hidden md:flex"
+          style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}
+        >
           <button
             type="button"
             className="btn-secondary dashboard-action-btn active:scale-[0.98]"
@@ -66,11 +69,11 @@ export default function DashboardHeader({
           </button>
           <button
             type="button"
-            className="btn-primary btn-success-glow dashboard-action-btn active:scale-[0.98]"
+            className="btn-secondary dashboard-action-btn dashboard-action-bill active:scale-[0.98]"
             onClick={onOpenBillModal}
             title="Subir foto de factura y desglosar productos entre participantes"
           >
-            <Receipt size={16} /> <span>Pagar con Factura</span>
+            <Receipt size={16} style={{ color: 'var(--accent-mint)' }} /> <span>Pagar con Factura</span>
           </button>
           <button
             type="button"
