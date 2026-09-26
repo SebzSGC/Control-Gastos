@@ -17,7 +17,10 @@ import {
   BillDetailsModal,
   DeleteExpenseModal,
   PaymentInfoModal,
+  PaymentVoucherModal,
+  FloatingActionDock,
 } from '../components/dashboard';
+
 
 import { useToast } from '../context/ToastContext';
 import { useTheme } from '../context/ThemeContext';
@@ -74,8 +77,16 @@ export default function Dashboard() {
   const [showModal, setShowModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedPayProfile, setSelectedPayProfile] = useState(null);
+  const [showVoucherModal, setShowVoucherModal] = useState(false);
+  const [voucherTarget, setVoucherTarget] = useState(null);
   const [expenseToDelete, setExpenseToDelete] = useState(null);
   const [isDeletingExpense, setIsDeletingExpense] = useState(false);
+
+  const handleOpenVoucherModal = useCallback((target) => {
+    setVoucherTarget(target);
+    setShowVoucherModal(true);
+  }, []);
+
 
   const fetchSettlements = useCallback(() => {
     fetch(`${API_URL}/groups/${id}/settlement`)
@@ -154,7 +165,7 @@ export default function Dashboard() {
     });
 
     newSocket.on('peer_joined_nfc', (data) => {
-      toast.success(data?.message || '¡Un compañero se unió mediante NFC! 📡');
+      toast.success(data?.message || '¡Un compañero se unió mediante NFC!');
     });
 
     // Real-time Live Bill Split events
@@ -162,7 +173,7 @@ export default function Dashboard() {
       if (data && data.hostProfileId !== me?.id) {
         setActiveLiveBill(data);
         toast.info(
-          `🧾 Cuenta Abierta en Vivo: ${data.hostName} subió la factura de "${data.storeName}". Toca aquí para marcar tus consumos.`
+          `Cuenta Abierta en Vivo: ${data.hostName} subió la factura de "${data.storeName}". Toca aquí para marcar tus consumos.`
         );
       }
     });
@@ -435,7 +446,7 @@ export default function Dashboard() {
                 lineHeight: '1.4',
               }}
             >
-              ☁️ Despertando servidor en la nube (Render Free Tier)... Esto puede tomar unos segundos la primera vez.
+              Despertando servidor en la nube (Render Free Tier)... Esto puede tomar unos segundos la primera vez.
             </p>
           )}
         </div>
@@ -452,7 +463,7 @@ export default function Dashboard() {
         onSwitchProfile={() => navigate(`/group/${id}`)}
       />
 
-      <main className="container dashboard-main-container animate-fade-in">
+      <main className="container dashboard-main-container pb-24 md:pb-8 animate-fade-in">
         {/* Real-time Live Bill Alert Banner */}
         <ActiveSessionsBanner
           activeLiveBill={activeLiveBill}
@@ -489,6 +500,7 @@ export default function Dashboard() {
             me={me}
             fairShare={fairShare}
             onSelectPayProfile={setSelectedPayProfile}
+            onOpenVoucherModal={handleOpenVoucherModal}
           />
         )}
 
@@ -536,7 +548,36 @@ export default function Dashboard() {
         <PaymentInfoModal
           profile={selectedPayProfile}
           onClose={() => setSelectedPayProfile(null)}
+          onOpenVoucherModal={(creditorProfile) => {
+            const debt = settlements.find((s) => s.from === me?.id && s.to === creditorProfile.id);
+            setSelectedPayProfile(null);
+            handleOpenVoucherModal({
+              creditor: creditorProfile,
+              amount: debt ? debt.amount : 0,
+              settlement: debt || null,
+            });
+          }}
         />
+
+        {/* Modal: Payment Voucher & Instant Settlement */}
+        {showVoucherModal && voucherTarget && (
+          <PaymentVoucherModal
+            isOpen={showVoucherModal}
+            onClose={() => {
+              setShowVoucherModal(false);
+              setVoucherTarget(null);
+            }}
+            groupId={id}
+            currentProfile={me}
+            targetCreditor={voucherTarget.creditor}
+            initialAmount={voucherTarget.amount || 0}
+            onSuccess={() => {
+              fetchSettlements();
+              setShowVoucherModal(false);
+              setVoucherTarget(null);
+            }}
+          />
+        )}
 
         {/* Modal: Confirm Delete Expense */}
         <DeleteExpenseModal
@@ -545,6 +586,7 @@ export default function Dashboard() {
           onConfirm={handleDeleteExpense}
           isDeleting={isDeletingExpense}
         />
+
 
         {/* Modal: Bill Splitter (Pago total mediante factura) */}
         {showBillModal && (
@@ -576,6 +618,13 @@ export default function Dashboard() {
         <BillDetailsModal
           bill={viewingBill}
           onClose={() => setViewingBill(null)}
+        />
+
+        {/* Mobile Quick Action Floating Dock */}
+        <FloatingActionDock
+          onOpenAddExpenseModal={() => setShowModal(true)}
+          onOpenBillModal={() => setShowBillModal(true)}
+          onOpenProfileModal={() => setShowProfileModal(true)}
         />
       </main>
     </>

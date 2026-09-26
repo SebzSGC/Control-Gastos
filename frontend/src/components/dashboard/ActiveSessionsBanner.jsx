@@ -31,7 +31,7 @@ export default function ActiveSessionsBanner({ activeLiveBill, onOpenClaimModal 
 
       <div className="live-bill-text-wrap">
         <div className="live-bill-title">
-          🧾 Cuenta Abierta en Vivo: <strong>{activeLiveBill.hostName}</strong> subió la factura de <strong>&quot;{activeLiveBill.storeName}&quot;</strong>. Toca aquí para marcar tus consumos.
+          Cuenta Abierta en Vivo: <strong>{activeLiveBill.hostName}</strong> subió la factura de <strong>&quot;{activeLiveBill.storeName}&quot;</strong>. Toca aquí para marcar tus consumos.
         </div>
         <div className="live-bill-subtitle">
           Los demás integrantes están seleccionando sus platos en tiempo real.

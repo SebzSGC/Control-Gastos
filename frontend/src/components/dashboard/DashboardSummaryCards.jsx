@@ -61,7 +61,7 @@ export default function DashboardSummaryCards({
       <div className="glass-panel bento-card">
         <div className="bento-card-header">
           <span className="bento-card-title">Gasto Total del Grupo</span>
-          <div className="bento-card-icon" style={{ background: 'var(--primary-glow)', color: 'var(--primary)' }}>
+          <div className="bento-card-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--accent-mint)' }}>
             <Receipt size={18} />
           </div>
         </div>
@@ -69,7 +69,9 @@ export default function DashboardSummaryCards({
           {formatCOP(totalSpent)}
         </div>
         <div className="bento-card-footer">
-          <span>{registeredExpensesCount} gastos registrados</span>
+          <span className="bento-badge bento-badge-neutral">
+            {registeredExpensesCount} gastos registrados
+          </span>
         </div>
       </div>
 
@@ -97,9 +99,17 @@ export default function DashboardSummaryCards({
           {myBalance === 0 ? '$ 0' : formatCOP(Math.abs(myBalance))}
         </div>
         <div className="bento-card-footer">
-          <strong style={{ color: balanceIconColor }}>
+          <span
+            className={`bento-badge ${
+              isPositive
+                ? 'bento-badge-positive'
+                : isNegative
+                ? 'bento-badge-negative'
+                : 'bento-badge-neutral'
+            }`}
+          >
             {balanceStatusLabel}
-          </strong>
+          </span>
         </div>
       </div>
 
@@ -107,7 +117,7 @@ export default function DashboardSummaryCards({
       <div className="glass-panel bento-card">
         <div className="bento-card-header">
           <span className="bento-card-title">Cuota por Persona</span>
-          <div className="bento-card-icon" style={{ background: 'var(--accent-bg)', color: 'var(--accent)' }}>
+          <div className="bento-card-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--accent-mint)' }}>
             <Users size={18} />
           </div>
         </div>
@@ -115,7 +125,9 @@ export default function DashboardSummaryCards({
           {formatCOP(fairShare)}
         </div>
         <div className="bento-card-footer">
-          <span>División entre {profilesCount} participantes</span>
+          <span className="bento-badge bento-badge-neutral">
+            División entre {profilesCount} participantes
+          </span>
         </div>
       </div>
     </section>

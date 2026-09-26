@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Plus, User, Smartphone, ArrowRight, X, RotateCw, AlertTriangle } from 'lucide-react';
+import { Plus, User, QrCode, ArrowRight, ArrowLeft, X, RotateCw, AlertTriangle } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { useToast } from '../context/ToastContext';
 import { API_URL } from '../config/api';
@@ -129,13 +129,13 @@ export default function Profiles() {
   if (loading) {
     return (
       <>
-        <Navbar />
+        <Navbar showBackButton={true} onBack={() => navigate('/')} />
         <div className="flex-center" style={{ minHeight: '75vh', flexDirection: 'column', gap: '1rem', padding: '1.5rem', textAlign: 'center' }}>
           <div className="status-dot" style={{ width: 14, height: 14, borderRadius: '50%', background: 'var(--primary)', animation: 'ripplePulse 1.5s infinite' }} />
           <p className="text-muted" style={{ fontWeight: '600' }}>Cargando sala y participantes...</p>
           {slowLoad && (
             <p className="animate-fade-in" style={{ fontSize: '0.85rem', color: 'var(--accent, #06b6d4)', maxWidth: '380px', lineHeight: '1.4' }}>
-              ☁️ Despertando servidor en la nube (Render Free Tier)... Esto puede tomar unos segundos la primera vez.
+              Despertando servidor en la nube (Render Free Tier)... Esto puede tomar unos segundos la primera vez.
             </p>
           )}
         </div>
@@ -146,7 +146,7 @@ export default function Profiles() {
   if (loadError) {
     return (
       <>
-        <Navbar />
+        <Navbar showBackButton={true} onBack={() => navigate('/')} />
         <div className="flex-center" style={{ minHeight: '75vh', padding: '1.5rem' }}>
           <div className="glass-panel animate-toast-in" style={{ maxWidth: '420px', width: '100%', padding: '2rem', textAlign: 'center' }}>
             <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(244, 63, 94, 0.12)', color: 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
@@ -184,9 +184,17 @@ export default function Profiles() {
 
   return (
     <>
-      <Navbar group={group} />
+      <Navbar group={group} showBackButton={true} onBack={() => navigate('/')} />
 
       <main className="container profiles-main-container" style={{ maxWidth: '960px' }}>
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          className="btn-secondary btn-sm"
+          style={{ marginBottom: '1.25rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+        >
+          <ArrowLeft size={16} /> <span>Volver al Menú Principal</span>
+        </button>
         
         {/* Header */}
         <div className="profiles-header animate-fade-in" style={{ textAlign: 'center', marginBottom: '3rem' }}>
@@ -228,9 +236,9 @@ export default function Profiles() {
                 <span className="text-subtle">#{p.id.substring(0, 4).toUpperCase()}</span>
               </div>
 
-              {p.payment_key ? (
-                <span className="profile-badge-ready" title={`Llave: ${p.payment_key}`}>
-                  <Smartphone size={12} /> Llave lista
+              {p.payment_qr || p.payment_key ? (
+                <span className="profile-badge-ready" title={p.payment_qr ? 'Código QR Bre-B configurado' : `Llave: ${p.payment_key}`}>
+                  <QrCode size={12} /> {p.payment_qr ? 'QR Bre-B listo' : 'Llave lista'}
                 </span>
               ) : (
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>

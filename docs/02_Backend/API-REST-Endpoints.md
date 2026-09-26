@@ -7,13 +7,13 @@ author: "PaySync Team"
 status: completado
 ---
 
-# 🌐 Catálogo de Endpoints de la API REST
+# Catálogo de Endpoints de la API REST
 
 La API del backend está montada sobre Express 5 y escucha por defecto en el puerto `3001` (o en la variable `PORT`). Todas las respuestas son codificadas en formato JSON.
 
 ---
 
-## 🩺 Salud y Monitoreo
+## Salud y Monitoreo
 
 ### `GET /api/health` o `/health`
 Verifica el estado del servicio y la conectividad con la base de datos SQLite.
@@ -30,7 +30,7 @@ Verifica el estado del servicio y la conectividad con la base de datos SQLite.
 
 ---
 
-## 👥 Grupos y Perfiles
+## Grupos y Perfiles
 
 ### `POST /api/groups`
 Crea una nueva sala o grupo de gastos.
@@ -49,25 +49,28 @@ Agrega un participante a un grupo.
   {
     "groupId": "VIAJE2026",
     "name": "Sebas",
-    "paymentKey": "sebas.mp",
+    "paymentKey": "3001234567",
     "paymentQr": ""
   }
   ```
 
 ### `PUT /api/profiles/:id`
-Actualiza el nombre, clave de pago o código QR de un perfil existente.
+Actualiza el nombre, clave de pago o código QR vectorial/imagen de un perfil existente.
+
+### `POST /api/profiles/:id/upload-qr`
+Carga una imagen física o captura oficial de código QR de pago (`image/jpeg`, `image/png`, `image/webp` hasta 5MB) persistida en `uploads/qr/`.
 
 ---
 
-## 💸 Gastos y Liquidaciones
+## Gastos, Liquidaciones y Comprobantes
 
 ### `POST /api/expenses`
 Registra un nuevo gasto grupal o pago directo entre miembros. Emite notificación instantánea vía Socket.io (`expense_added`).
 * **Body:**
   ```json
   {
-    "groupId": "VIAJE2026",
-    "profileId": "prof-uuid-1",
+    "group_id": "VIAJE2026",
+    "profile_id": "prof-uuid-1",
     "amount": 450.00,
     "description": "Cena de bienvenida",
     "category": "comida",
@@ -75,8 +78,16 @@ Registra un nuevo gasto grupal o pago directo entre miembros. Emite notificació
   }
   ```
 
+### `POST /api/expenses/scan-voucher`
+Escanea de forma preliminar y efímera una captura de comprobante bancario para pre-llenar monto, banco y código de referencia en el frontend.
+* Detalle completo en: [[02_Backend/Comprobantes-Pago-OCR#11-post-apiexpensesscan-voucher]]
+
+### `POST /api/expenses/voucher-settlement`
+Registra formalmente una liquidación de deuda entre un deudor y un acreedor adjuntando comprobante bancario. Extingue la deuda en el balance grupal y emite el evento `expense_added`.
+* Detalle completo en: [[02_Backend/Comprobantes-Pago-OCR#12-post-apiexpensesvoucher-settlement]]
+
 ### `DELETE /api/expenses/:id`
-Elimina un gasto registrado por su identificador. Emite el evento `expense_deleted`.
+Elimina un gasto registrado por su identificador. Emite el evento `expense_deleted` y remueve el comprobante físico si existía.
 
 ### `GET /api/groups/:id/settlement`
 Calcula la matriz neta de deudas y devuelve la lista optimizada de transferencias requeridas mediante el [[02_Backend/Algoritmo-Liquidacion|Algoritmo de Liquidación Greedy]].
@@ -95,7 +106,7 @@ Calcula la matriz neta de deudas y devuelve la lista optimizada de transferencia
 
 ---
 
-## 🧾 Facturas y Visión Artificial (OCR)
+## Facturas y Visión Artificial (OCR)
 
 ### `POST /api/upload-receipt`
 Carga un ticket de compra (JPEG/PNG/WebP, máx 5MB). Ejecuta el preprocesamiento Jimp y la extracción OCR con Tesseract.js.
@@ -114,13 +125,14 @@ Carga un ticket de compra (JPEG/PNG/WebP, máx 5MB). Ejecuta el preprocesamiento
 
 ---
 
-## 📲 Simulación NFC
+## Simulación NFC
 
 ### `POST /api/nfc/resolve`
 Interpreta un payload crudo de etiqueta NFC (NDEF URL o código) y devuelve el identificador sanitizado del grupo correspondiente.
 
 ---
 
-## 🔗 Navegación Rápida
+## Navegación Rápida
 - Regresar a: [[00_MOC_PaySync]]
-- Siguiente: [[02_Backend/Algoritmo-Liquidacion|Algoritmo de Liquidación de Deudas]]
+- Siguiente: [[02_Backend/Comprobantes-Pago-OCR|Comprobantes de Pago Bancario y OCR]]
+- Algoritmo: [[02_Backend/Algoritmo-Liquidacion|Algoritmo de Liquidación de Deudas]]

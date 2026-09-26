@@ -86,21 +86,21 @@ export default function ExpensesList({
         <div className="segmented-control history-segmented-control">
           <button
             type="button"
-            className={`segmented-btn ${historyFilter === 'all' ? 'active' : ''}`}
+            className={`segmented-btn active:scale-[0.98] ${historyFilter === 'all' ? 'active' : ''}`}
             onClick={() => handleFilterChange('all')}
           >
             Todos
           </button>
           <button
             type="button"
-            className={`segmented-btn ${historyFilter === 'expense' ? 'active' : ''}`}
+            className={`segmented-btn active:scale-[0.98] ${historyFilter === 'expense' ? 'active' : ''}`}
             onClick={() => handleFilterChange('expense')}
           >
             Gastos
           </button>
           <button
             type="button"
-            className={`segmented-btn ${historyFilter === 'transfer' ? 'active' : ''}`}
+            className={`segmented-btn active:scale-[0.98] ${historyFilter === 'transfer' ? 'active' : ''}`}
             onClick={() => handleFilterChange('transfer')}
           >
             Abonos
@@ -110,9 +110,10 @@ export default function ExpensesList({
 
       {/* List */}
       {filteredExpenses.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>
-          <Receipt size={40} style={{ opacity: 0.35, margin: '0 auto 0.75rem' }} />
-          <p>No se encontraron movimientos registrados</p>
+        <div style={{ textAlign: 'center', padding: '3.5rem 1rem', color: 'var(--text-muted)' }}>
+          <Receipt size={36} style={{ opacity: 0.3, margin: '0 auto 0.75rem' }} />
+          <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)' }}>No se encontraron movimientos registrados</p>
+          <span className="text-subtle">Los gastos o abonos que registres aparecerán en esta lista.</span>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -136,10 +137,10 @@ export default function ExpensesList({
                 className="expense-item history-expense-item animate-fade-in"
                 style={{
                   borderLeft: isBill
-                    ? '3.5px solid var(--accent-mint)'
+                    ? '3px solid var(--accent-mint)'
                     : isTransfer
-                    ? '3.5px solid var(--primary)'
-                    : '3.5px solid var(--accent)',
+                    ? '3px solid var(--border-hover)'
+                    : '3px solid var(--border-subtle)',
                 }}
               >
                 <div className="history-item-main">
@@ -219,7 +220,7 @@ export default function ExpensesList({
                   {isBill && (
                     <button
                       type="button"
-                      className="btn-secondary btn-sm history-breakdown-btn"
+                      className="btn-secondary btn-sm history-breakdown-btn active:scale-[0.98]"
                       onClick={() => {
                         const found = bills.find(
                           (b) =>
@@ -246,14 +247,14 @@ export default function ExpensesList({
 
                   <span
                     className="num-tabular history-item-amount"
-                    style={{ fontWeight: '800', color: 'var(--text-main)' }}
+                    style={{ fontWeight: '700', color: 'var(--text-main)' }}
                   >
                     {formatCOP(ex.amount)}
                   </span>
 
                   <button
                     type="button"
-                    className="btn-danger-ghost history-delete-btn"
+                    className="btn-danger-ghost history-delete-btn active:scale-[0.98]"
                     onClick={() => onDeleteExpense(ex)}
                     title="Eliminar movimiento"
                   >
@@ -287,7 +288,7 @@ export default function ExpensesList({
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <button
               type="button"
-              className="btn-secondary btn-sm"
+              className="btn-secondary btn-sm active:scale-[0.98]"
               disabled={safePage <= 1}
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
@@ -296,7 +297,7 @@ export default function ExpensesList({
             </button>
             <button
               type="button"
-              className="btn-secondary btn-sm"
+              className="btn-secondary btn-sm active:scale-[0.98]"
               disabled={safePage >= totalPages}
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}

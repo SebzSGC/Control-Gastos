@@ -7,13 +7,13 @@ author: "PaySync Team"
 status: completado
 ---
 
-# 🗄️ Modelo de Base de Datos y Esquema SQLite
+# Modelo de Base de Datos y Esquema SQLite
 
 El sistema utiliza **SQLite3** como motor de base de datos relacional rápido, autocontenido y de baja latencia, configurado con `PRAGMA foreign_keys = ON;` y persistencia en volumen montable (`DATABASE_PATH`).
 
 ---
 
-## 📊 Diagrama Entidad-Relación (Mermaid)
+## Diagrama Entidad-Relación (Mermaid)
 
 ```mermaid
 erDiagram
@@ -107,7 +107,7 @@ erDiagram
 
 ---
 
-## ⚡ Índices de Rendimiento
+## Índices de Rendimiento
 
 Para optimizar las consultas a medida que crecen las transacciones de los grupos, se implementan los siguientes índices en disco:
 
@@ -123,6 +123,6 @@ CREATE INDEX IF NOT EXISTS idx_active_bill_sessions_group ON active_bill_session
 
 ---
 
-## 🔗 Navegación Rápida
+## Navegación Rápida
 - Regresar a: [[00_MOC_PaySync]]
 - Siguiente: [[02_Backend/API-REST-Endpoints|Catálogo de Endpoints REST]]

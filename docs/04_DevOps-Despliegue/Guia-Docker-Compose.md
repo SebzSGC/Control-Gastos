@@ -7,7 +7,7 @@ author: "PaySync Team"
 status: completado
 ---
 
-# 🐳 Orquestación con Docker y Docker Compose
+# Orquestación con Docker y Docker Compose
 
 PaySync ofrece dos modelos de contenerización listos para usar según las necesidades de rendimiento, simplicidad y arquitectura del equipo:
 
@@ -16,16 +16,16 @@ PaySync ofrece dos modelos de contenerización listos para usar según las neces
 
 ---
 
-## 🏗️ Comparativa de Arquitecturas Contenerizadas
+## Comparativa de Arquitecturas Contenerizadas
 
 ```mermaid
 flowchart LR
-    subgraph ModoUnificado["📦 Modo Unificado (docker-compose.yml)"]
+    subgraph ModoUnificado["Modo Unificado (docker-compose.yml)"]
         direction TB
         ClientU["Cliente Web"] --> NodeU["Contenedor Node.js\n- API Express (Puerto 3001)\n- WebSockets\n- Serve Estáticos React\n- SQLite Local"]
     end
 
-    subgraph ModoDesacoplado["🔀 Modo Desacoplado (docker-compose.decoupled.yml)"]
+    subgraph ModoDesacoplado["Modo Desacoplado (docker-compose.decoupled.yml)"]
         direction TB
         ClientD["Cliente Web"] --> NginxD["Nginx Contenedor\n(Puerto 80)\n- Sirve React Build\n- Proxy Pass /api y /socket.io"]
         NginxD --> NodeD["Express API Contenedor\n(Puerto 3001)\n- Endpoints & DB"]
@@ -104,14 +104,14 @@ docker compose -f docker-compose.decoupled.yml ps
 
 ---
 
-## 💾 Persistencia de Datos y Volúmenes
+## Persistencia de Datos y Volúmenes
 
 > [!CAUTION]
 > Dado que la base de datos es un archivo SQLite (`app_data.db`), es imprescindible que el directorio donde reside esté vinculado a un volumen persistente (`paysync_data:/app/data`). De lo contrario, cualquier recreación del contenedor borrará los registros de los grupos.
 
 ---
 
-## 🔗 Navegación Rápida
+## Navegación Rápida
 - Regresar a: [[00_MOC_PaySync]]
 - Siguiente: [[04_DevOps-Despliegue/Variables-Entorno|Matriz de Variables de Entorno]]
 - Relacionado: [[04_DevOps-Despliegue/Despliegue-Cloud|Guía de Despliegue Multi-Cloud]]

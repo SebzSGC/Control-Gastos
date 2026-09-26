@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sun, Moon, Copy, Check, ArrowLeft, Radio } from 'lucide-react';
+import { Sun, Moon, Copy, Check, ArrowLeft, Radio, Users } from 'lucide-react';
 import Logo from './Logo';
 import NFCShareModal from './NFCShareModal';
 import { useTheme } from '../context/ThemeContext';
@@ -96,14 +96,16 @@ export default function Navbar({
 
             {activeProfile && (
               <button 
+                type="button"
                 className="user-pill-btn" 
                 onClick={handleProfileClick || undefined} 
-                title={handleProfileClick ? "Cambiar o ver participante" : ""}
+                title="Toca para cambiar de participante"
               >
                 <div className="avatar-chip">
                   {activeProfile.name.charAt(0).toUpperCase()}
                 </div>
                 <span className="user-pill-name">{activeProfile.name}</span>
+                <Users size={13} style={{ opacity: 0.7, marginLeft: '0.35rem' }} />
               </button>
             )}
 

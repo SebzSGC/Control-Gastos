@@ -21,14 +21,14 @@ if (dbPath !== ':memory:') {
       fs.mkdirSync(dbDir, { recursive: true });
     }
   } catch (dirErr) {
-    console.warn(`⚠️ Warning: Could not create directory for DATABASE_PATH (${dbPath}): ${dirErr.message}. Falling back to local app_data.db`);
+    console.warn(`[WARN] Could not create directory for DATABASE_PATH (${dbPath}): ${dirErr.message}. Falling back to local app_data.db`);
     dbPath = path.join(__dirname, '..', 'app_data.db');
   }
 }
 
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) console.error('Database opening error: ', err);
-  else console.log(`🗄️ SQLite database loaded from: ${dbPath}`);
+  else console.log(`[DB] SQLite database loaded from: ${dbPath}`);
 });
 
 // Initialize Database with foreign keys and performance indexes
@@ -36,6 +36,11 @@ db.serialize(() => {
   db.run("PRAGMA foreign_keys = ON;");
   db.run("CREATE TABLE IF NOT EXISTS groups (id TEXT PRIMARY KEY, name TEXT)");
   db.run("CREATE TABLE IF NOT EXISTS profiles (id TEXT PRIMARY KEY, group_id TEXT, name TEXT, payment_key TEXT, payment_qr TEXT)");
+  
+  // Safe migrations for profiles table
+  db.run("ALTER TABLE profiles ADD COLUMN payment_key TEXT", () => {});
+  db.run("ALTER TABLE profiles ADD COLUMN payment_qr TEXT", () => {});
+
   db.run(`CREATE TABLE IF NOT EXISTS expenses (
     id TEXT PRIMARY KEY, 
     group_id TEXT, 
@@ -45,13 +50,15 @@ db.serialize(() => {
     category TEXT DEFAULT 'general',
     type TEXT DEFAULT 'expense',
     to_profile_id TEXT,
+    voucher_url TEXT,
+    voucher_ref TEXT,
     date TEXT
   )`);
 
-  // Safe migration for existing databases missing 'category' column
-  db.run("ALTER TABLE expenses ADD COLUMN category TEXT DEFAULT 'general'", () => {
-    // Silently ignore if column already exists
-  });
+  // Safe migrations for expenses table
+  db.run("ALTER TABLE expenses ADD COLUMN category TEXT DEFAULT 'general'", () => {});
+  db.run("ALTER TABLE expenses ADD COLUMN voucher_url TEXT", () => {});
+  db.run("ALTER TABLE expenses ADD COLUMN voucher_ref TEXT", () => {});
 
   // Bills tables for itemized invoice splitting
   db.run(`CREATE TABLE IF NOT EXISTS bills (

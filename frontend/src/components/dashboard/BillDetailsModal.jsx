@@ -17,6 +17,7 @@ export default function BillDetailsModal({ bill, onClose }) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-container modal-wide animate-scale-up" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-drag-handle" />
         <div className="modal-header">
           <div className="modal-header-title-wrap">
             <div className="modal-icon-badge">
@@ -30,7 +31,7 @@ export default function BillDetailsModal({ bill, onClose }) {
               </p>
             </div>
           </div>
-          <button type="button" className="btn-icon-subtle" onClick={onClose} aria-label="Cerrar">
+          <button type="button" className="btn-icon-subtle active:scale-[0.98]" onClick={onClose} aria-label="Cerrar">
             <X size={18} />
           </button>
         </div>
@@ -126,7 +127,7 @@ export default function BillDetailsModal({ bill, onClose }) {
         </div>
 
         <div className="modal-footer" style={{ justifyContent: 'flex-end' }}>
-          <button type="button" className="btn-primary" onClick={onClose}>
+          <button type="button" className="btn-primary active:scale-[0.98]" onClick={onClose}>
             Cerrar
           </button>
         </div>

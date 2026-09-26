@@ -7,13 +7,13 @@ author: "PaySync Team"
 status: completado
 ---
 
-# 🔐 Matriz de Variables de Entorno y Configuración
+# Matriz de Variables de Entorno y Configuración
 
 PaySync centraliza sus opciones de ejecución a través de variables de entorno estándar. En entornos locales o de desarrollo, estas variables pueden declararse en un archivo `.env` en la raíz del proyecto.
 
 ---
 
-## 🛠️ Variables del Backend (Node.js / Express 5)
+## Variables del Backend (Node.js / Express 5)
 
 | Variable | Tipo | Valor por Defecto | Obligatoria | Descripción / Propósito |
 | :--- | :--- | :--- | :---: | :--- |
@@ -26,7 +26,7 @@ PaySync centraliza sus opciones de ejecución a través de variables de entorno 
 
 ---
 
-## 🎨 Variables del Frontend (React / Vite)
+## Variables del Frontend (React / Vite)
 
 > [!NOTE]
 > En Vite, todas las variables destinadas al cliente deben llevar obligatoriamente el prefijo `VITE_`.
@@ -38,7 +38,7 @@ PaySync centraliza sus opciones de ejecución a través de variables de entorno 
 
 ---
 
-## 🔒 Buenas Prácticas de Seguridad
+## Buenas Prácticas de Seguridad
 
 1. **Gestión de Secretos:**
    - **NUNCA** subas el archivo `.env` al repositorio de Git (está expresamente incluido en `.gitignore`).
@@ -48,7 +48,7 @@ PaySync centraliza sus opciones de ejecución a través de variables de entorno 
 
 ---
 
-## 🔗 Navegación Rápida
+## Navegación Rápida
 - Regresar a: [[00_MOC_PaySync]]
 - Siguiente: [[05_Calidad-Testing/Plan-de-Pruebas|Estrategia y Plan de Testing]]
 - Relacionado: [[04_DevOps-Despliegue/Despliegue-Cloud|Guía de Despliegue Multi-Cloud]] | [[04_DevOps-Despliegue/Guia-Docker-Compose|Guía Docker Compose]]

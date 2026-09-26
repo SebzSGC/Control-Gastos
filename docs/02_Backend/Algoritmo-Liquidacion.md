@@ -7,13 +7,13 @@ author: "PaySync Team"
 status: completado
 ---
 
-# 🧮 Algoritmo de Liquidación de Deudas
+# Algoritmo de Liquidación de Deudas
 
 Uno de los mayores dolores de cabeza en grupos que comparten gastos es resolver quién le debe a quién sin generar una maraña interminable de micropagos cruzados. PaySync implementa un **algoritmo voraz (*greedy*) de minimización de flujos de efectivo**.
 
 ---
 
-## 💡 Principio Matemático
+## Principio Matemático
 
 1. **Cálculo de Balances Netos:**
    Para cada participante $i$:
@@ -31,7 +31,7 @@ Uno de los mayores dolores de cabeza en grupos que comparten gastos es resolver 
 
 ---
 
-## 📊 Ejemplo de Flujo de Transacciones
+## Ejemplo de Flujo de Transacciones
 
 ```mermaid
 flowchart LR
@@ -52,6 +52,6 @@ flowchart LR
 
 ---
 
-## 🔗 Navegación Rápida
+## Navegación Rápida
 - Regresar a: [[00_MOC_PaySync]]
 - Siguiente: [[02_Backend/Pipeline-OCR-Vision|Pipeline OCR de Facturas]]

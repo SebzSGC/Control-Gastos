@@ -7,13 +7,13 @@ author: "PaySync Team"
 status: completado
 ---
 
-# 🏛️ Visión General del Sistema PaySync
+# Visión General del Sistema PaySync
 
 **PaySync** es una solución fintech integral diseñada para resolver la fricción financiera en gastos compartidos (viajes grupales, pisos compartidos, cenas y eventos de amigos).
 
 ---
 
-## 🎯 Pilares del Negocio
+## Pilares del Negocio
 
 1. **Digitalización Inmediata de Gastos:**
    A través de [[02_Backend/Pipeline-OCR-Vision|OCR Multimodal]], los usuarios pueden subir la fotografía de una factura o ticket físico; el sistema extrae automáticamente el desglose de productos, cantidades y precios unitarios.
@@ -26,7 +26,7 @@ status: completado
 
 ---
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnológico
 
 | Capa | Componente | Versión / Detalle |
 | :--- | :--- | :--- |
@@ -41,6 +41,6 @@ status: completado
 
 ---
 
-## 🔗 Navegación Rápida
+## Navegación Rápida
 - Regresar a: [[00_MOC_PaySync]]
 - Siguiente: [[01_Arquitectura/Base-de-Datos-ER|Modelo de Base de Datos SQLite]]

@@ -1,4 +1,5 @@
-import { Smartphone, Receipt, Plus, Wallet, Activity, Layers } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Smartphone, Receipt, Plus, Wallet, Activity, Layers, Users } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 
 /**
@@ -19,6 +20,7 @@ export default function DashboardHeader({
   onOpenBillModal,
   onOpenAddExpenseModal,
 }) {
+  const navigate = useNavigate();
   const toast = useToast();
 
   const handleCopyCode = () => {
@@ -29,6 +31,18 @@ export default function DashboardHeader({
 
   return (
     <>
+      {/* Quick Navigation Actions */}
+      <div className="dashboard-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '0.85rem', flexWrap: 'wrap' }}>
+        <button
+          type="button"
+          onClick={() => navigate('/group/' + group?.id)}
+          className="btn-nav-action active:scale-[0.98]"
+          title="Seleccionar o cambiar el participante activo en esta sala"
+        >
+          <Users size={14} /> <span>Cambiar Participante ({currentProfile?.name})</span>
+        </button>
+      </div>
+
       {/* Top Greeting & Action Banner */}
       <div className="dashboard-header-row">
         <div className="dashboard-greeting-block">
@@ -54,10 +68,14 @@ export default function DashboardHeader({
           </p>
         </div>
 
-        <div className="dashboard-action-buttons">
+        {/* Desktop Action Buttons (hidden on mobile to give room to the Floating Action Dock) */}
+        <div
+          className="dashboard-action-buttons hidden md:flex"
+          style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}
+        >
           <button
             type="button"
-            className="btn-secondary dashboard-action-btn"
+            className="btn-secondary dashboard-action-btn active:scale-[0.98]"
             onClick={onOpenProfileModal}
             title="Mi Llave Bre-B / Nequi"
           >
@@ -65,15 +83,15 @@ export default function DashboardHeader({
           </button>
           <button
             type="button"
-            className="btn-primary btn-success-glow dashboard-action-btn"
+            className="btn-secondary dashboard-action-btn dashboard-action-bill active:scale-[0.98]"
             onClick={onOpenBillModal}
             title="Subir foto de factura y desglosar productos entre participantes"
           >
-            <Receipt size={16} /> <span>Pagar con Factura</span>
+            <Receipt size={16} style={{ color: 'var(--accent-mint)' }} /> <span>Pagar con Factura</span>
           </button>
           <button
             type="button"
-            className="btn-primary dashboard-action-btn dashboard-action-main"
+            className="btn-primary dashboard-action-btn dashboard-action-main active:scale-[0.98]"
             onClick={onOpenAddExpenseModal}
           >
             <Plus size={18} /> <span>Registrar Movimiento</span>
@@ -81,34 +99,38 @@ export default function DashboardHeader({
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="nav-tabs-wrapper" role="tablist" aria-label="Secciones del Tablero">
+      {/* Navigation Tabs with smooth horizontal scroll and no wrapping */}
+      <div
+        className="nav-tabs-wrapper overflow-x-auto scrollbar-none flex-nowrap"
+        role="tablist"
+        aria-label="Secciones del Tablero"
+      >
         <button
           type="button"
           role="tab"
           aria-selected={activeTab === 'balances'}
-          className={`nav-tab-btn ${activeTab === 'balances' ? 'active' : ''}`}
+          className={`nav-tab-btn active:scale-[0.98] ${activeTab === 'balances' ? 'active' : ''}`}
           onClick={() => onTabChange('balances')}
         >
-          <Wallet size={18} /> Saldos & Liquidación Inteligente
+          <Wallet size={18} /> <span>Saldos & Liquidación</span>
         </button>
         <button
           type="button"
           role="tab"
           aria-selected={activeTab === 'analytics'}
-          className={`nav-tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
+          className={`nav-tab-btn active:scale-[0.98] ${activeTab === 'analytics' ? 'active' : ''}`}
           onClick={() => onTabChange('analytics')}
         >
-          <Activity size={18} /> Analíticas Visuales
+          <Activity size={18} /> <span>Analíticas Visuales</span>
         </button>
         <button
           type="button"
           role="tab"
           aria-selected={activeTab === 'history'}
-          className={`nav-tab-btn ${activeTab === 'history' ? 'active' : ''}`}
+          className={`nav-tab-btn active:scale-[0.98] ${activeTab === 'history' ? 'active' : ''}`}
           onClick={() => onTabChange('history')}
         >
-          <Layers size={18} /> Historial ({expensesCount})
+          <Layers size={18} /> <span>Historial ({expensesCount})</span>
         </button>
       </div>
     </>

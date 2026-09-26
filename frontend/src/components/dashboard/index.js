@@ -9,3 +9,6 @@ export { default as ProfileKeyModal } from './ProfileKeyModal';
 export { default as BillDetailsModal } from './BillDetailsModal';
 export { default as DeleteExpenseModal } from './DeleteExpenseModal';
 export { default as PaymentInfoModal } from './PaymentInfoModal';
+export { default as PaymentVoucherModal } from './PaymentVoucherModal';
+export { default as FloatingActionDock } from './FloatingActionDock';
+

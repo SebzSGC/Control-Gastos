@@ -1,11 +1,17 @@
-import { Sparkles, CheckCircle2, ArrowRight, Wallet, Smartphone } from 'lucide-react';
+import { Sparkles, CheckCircle2, ArrowRight, Wallet, Smartphone, Receipt, QrCode } from 'lucide-react';
 import { formatCOP } from '../../utils/formatters';
 
 /**
  * SettlementItem
  * Atomic card representing a single optimized debt payment from Member A to Member B.
  */
-export function SettlementItem({ settlement, profiles, me, onSelectPayProfile }) {
+export function SettlementItem({
+  settlement,
+  profiles,
+  me,
+  onSelectPayProfile,
+  onOpenVoucherModal,
+}) {
   const toProfile = profiles.find((p) => p.id === settlement.to);
   const isFromMe = settlement.from === me?.id;
   const isToMe = settlement.to === me?.id;
@@ -15,10 +21,10 @@ export function SettlementItem({ settlement, profiles, me, onSelectPayProfile })
       className="settlement-card animate-fade-in"
       style={{
         borderLeft: isFromMe
-          ? '4px solid var(--danger)'
+          ? '3px solid var(--accent-rose)'
           : isToMe
-          ? '4px solid var(--success)'
-          : '1px solid var(--border-subtle)',
+          ? '3px solid var(--accent-mint)'
+          : '3px solid var(--border-subtle)',
       }}
     >
       <div className="settlement-card-info">
@@ -26,8 +32,8 @@ export function SettlementItem({ settlement, profiles, me, onSelectPayProfile })
           <span className="settlement-person">
             {settlement.from_name} {isFromMe ? '(Tú)' : ''}
           </span>
-          <ArrowRight size={16} color="var(--text-muted)" />
-          <span className="settlement-person" style={{ color: 'var(--primary)' }}>
+          <ArrowRight size={15} color="var(--text-muted)" />
+          <span className="settlement-person" style={{ color: 'var(--accent-mint)' }}>
             {settlement.to_name} {isToMe ? '(Tú)' : ''}
           </span>
         </div>
@@ -35,7 +41,7 @@ export function SettlementItem({ settlement, profiles, me, onSelectPayProfile })
         <div className="settlement-card-amount-row">
           <span
             className="num-tabular settlement-amount"
-            style={{ fontWeight: '800', fontSize: '1.15rem', color: 'var(--text-main)' }}
+            style={{ fontWeight: '700', fontSize: '1.15rem', color: 'var(--text-main)' }}
           >
             {formatCOP(settlement.amount)}
           </span>
@@ -48,18 +54,49 @@ export function SettlementItem({ settlement, profiles, me, onSelectPayProfile })
       </div>
 
       {toProfile && (
-        <button
-          type="button"
-          className="btn-secondary settlement-pay-btn"
-          onClick={() => onSelectPayProfile(toProfile)}
-          title={`Ver datos de pago de ${settlement.to_name}`}
+        <div
+          className="settlement-actions-group"
+          style={{ display: 'flex', gap: '0.45rem', alignItems: 'center', flexWrap: 'wrap' }}
         >
-          <Wallet size={14} /> Pagar
-        </button>
+          <button
+            type="button"
+            className="btn-secondary settlement-pay-btn active:scale-[0.98]"
+            onClick={() => onSelectPayProfile(toProfile)}
+            title={`Ver datos de pago de ${settlement.to_name}`}
+          >
+            <Wallet size={14} /> Pagar
+          </button>
+
+          {isFromMe && (
+            <button
+              type="button"
+              className="btn-primary settlement-voucher-btn active:scale-[0.98]"
+              onClick={() =>
+                onOpenVoucherModal &&
+                onOpenVoucherModal({
+                  creditor: toProfile,
+                  amount: settlement.amount,
+                  settlement,
+                })
+              }
+              title={`Subir comprobante y liquidar deuda con ${settlement.to_name}`}
+              style={{
+                fontSize: '0.8rem',
+                padding: '0.45rem 0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+              }}
+            >
+              <Receipt size={14} /> Subir Comprobante
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
 }
+
 
 /**
  * MemberBalanceItem
@@ -67,6 +104,7 @@ export function SettlementItem({ settlement, profiles, me, onSelectPayProfile })
  */
 export function MemberBalanceItem({ member, isMe, onSelectPayProfile }) {
   const isPositive = member.balance >= 0;
+  const hasPaymentInfo = Boolean(member.payment_key || member.payment_qr);
 
   return (
     <div className="expense-item balance-member-item" style={{ marginBottom: 0 }}>
@@ -114,14 +152,27 @@ export function MemberBalanceItem({ member, isMe, onSelectPayProfile }) {
         </span>
 
         {!isMe && (
-          <button
-            type="button"
-            className="balance-pay-key-btn"
-            onClick={() => onSelectPayProfile(member)}
-            title={member.payment_key ? `Ver llave de ${member.name}` : 'Sin llave configurada'}
-          >
-            <Smartphone size={13} /> {member.payment_key ? 'Ver llave' : 'Sin llave'}
-          </button>
+          hasPaymentInfo ? (
+            <button
+              type="button"
+              className="balance-pay-key-btn balance-pay-key-btn--ready active:scale-[0.98]"
+              onClick={() => onSelectPayProfile(member)}
+              title={`Ver datos de pago de ${member.name}`}
+            >
+              <QrCode size={12} />
+              <span>Ver QR / Llave</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="balance-pay-key-btn balance-pay-key-btn--empty active:scale-[0.98]"
+              onClick={() => onSelectPayProfile(member)}
+              title={`${member.name} no ha configurado su llave o QR de pago`}
+            >
+              <Smartphone size={12} style={{ opacity: 0.6 }} />
+              <span>Sin llave</span>
+            </button>
+          )
         )}
       </div>
     </div>
@@ -149,6 +200,7 @@ export default function SettlementCard({
   me,
   fairShare = 0,
   onSelectPayProfile,
+  onOpenVoucherModal,
 }) {
   return (
     <div className="dashboard-tab-grid">
@@ -187,7 +239,7 @@ export default function SettlementCard({
       {/* Right Column: Smart Min-Cash-Flow Settlements */}
       <div className="glass-panel" style={{ padding: '1.75rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-          <Sparkles size={20} color="var(--accent)" />
+          <Sparkles size={20} color="var(--accent-mint)" />
           <h3 style={{ fontSize: '1.15rem', fontWeight: '700', margin: 0 }}>
             Liquidación Óptima
           </h3>
@@ -198,8 +250,8 @@ export default function SettlementCard({
 
         {settlements.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '2.5rem 1rem', color: 'var(--text-muted)' }}>
-            <CheckCircle2 size={42} color="var(--success)" style={{ margin: '0 auto 0.75rem' }} />
-            <h4 style={{ color: 'var(--text-main)', marginBottom: '0.25rem' }}>¡Cuentas al Día!</h4>
+            <CheckCircle2 size={36} color="var(--accent-mint)" style={{ opacity: 0.85, margin: '0 auto 0.75rem' }} />
+            <h4 style={{ color: 'var(--text-main)', marginBottom: '0.25rem', fontWeight: '600' }}>¡Cuentas al Día!</h4>
             <p className="text-subtle">No hay deudas pendientes entre los miembros del grupo.</p>
           </div>
         ) : (
@@ -211,6 +263,7 @@ export default function SettlementCard({
                 profiles={profiles}
                 me={me}
                 onSelectPayProfile={onSelectPayProfile}
+                onOpenVoucherModal={onOpenVoucherModal}
               />
             ))}
           </div>
@@ -219,3 +272,4 @@ export default function SettlementCard({
     </div>
   );
 }
+

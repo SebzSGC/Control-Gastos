@@ -48,7 +48,7 @@ export default function LiveBillClaimModal({
         });
 
         if (data.profileId !== currentProfile?.id) {
-          showToast(`🍽️ ${data.profileName} marcó: ${data.itemName || 'un plato'}`, 'info');
+          showToast(`${data.profileName} marcó: ${data.itemName || 'un plato'}`, 'info');
         }
       }
     };
@@ -144,6 +144,7 @@ export default function LiveBillClaimModal({
         onClick={e => e.stopPropagation()}
         style={{ maxWidth: '680px', maxHeight: '90vh' }}
       >
+        <div className="sheet-drag-handle" />
         {/* Header */}
         <div className="modal-header">
           <div className="modal-header-title-wrap">
@@ -193,7 +194,7 @@ export default function LiveBillClaimModal({
               </span>
             </div>
             <span style={{ fontSize: '0.8rem', color: 'var(--accent-mint)', fontWeight: '600' }}>
-              ⚡ Sincronización en vivo activa
+              Sincronización en vivo activa
             </span>
           </div>
 

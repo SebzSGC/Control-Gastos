@@ -135,9 +135,10 @@ export default function AddTransactionModal({
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-container animate-toast-in" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-drag-handle" />
         <div className="modal-header">
           <h3 style={{ fontSize: '1.35rem', fontWeight: '700' }}>Registrar Movimiento</h3>
-          <button type="button" className="modal-close-btn" onClick={onClose}>
+          <button type="button" className="modal-close-btn active:scale-[0.98]" onClick={onClose}>
             <X size={20} />
           </button>
         </div>
@@ -146,14 +147,14 @@ export default function AddTransactionModal({
         <div className="segmented-control" style={{ marginBottom: '1.5rem' }}>
           <button
             type="button"
-            className={`segmented-btn ${txType === 'expense' ? 'active' : ''}`}
+            className={`segmented-btn active:scale-[0.98] ${txType === 'expense' ? 'active' : ''}`}
             onClick={() => setTxType('expense')}
           >
             <Receipt size={16} /> Gasto Grupal
           </button>
           <button
             type="button"
-            className={`segmented-btn ${txType === 'transfer' ? 'active' : ''}`}
+            className={`segmented-btn active:scale-[0.98] ${txType === 'transfer' ? 'active' : ''}`}
             onClick={() => setTxType('transfer')}
           >
             <Send size={16} /> Abono / Transferencia
@@ -305,7 +306,7 @@ export default function AddTransactionModal({
           <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
             <button
               type="button"
-              className="btn-secondary"
+              className="btn-secondary active:scale-[0.98]"
               onClick={onClose}
               style={{ flex: 1 }}
             >
@@ -313,7 +314,7 @@ export default function AddTransactionModal({
             </button>
             <button
               type="submit"
-              className="btn-primary"
+              className="btn-primary active:scale-[0.98]"
               style={{ flex: 1 }}
               disabled={isSubmittingTx}
             >

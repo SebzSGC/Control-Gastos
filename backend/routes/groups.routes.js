@@ -32,7 +32,8 @@ router.get('/api/groups/:id', (req, res) => {
     db.all('SELECT * FROM profiles WHERE group_id = ?', [groupId], (err, profiles) => {
       if (err) return res.status(500).json({ error: err.message });
       
-      db.all(`SELECT expenses.*, profiles.name as profile_name 
+      db.all(`SELECT expenses.*, profiles.name as profile_name,
+              (SELECT name FROM profiles WHERE id = expenses.to_profile_id) as to_profile_name 
               FROM expenses 
               JOIN profiles ON expenses.profile_id = profiles.id 
               WHERE expenses.group_id = ?

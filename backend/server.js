@@ -65,7 +65,30 @@ app.use(cors({
   origin: corsOrigin,
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Static uploads directory serving
+const uploadDir = process.env.UPLOAD_DIR 
+  ? path.resolve(process.env.UPLOAD_DIR) 
+  : path.join(__dirname, 'uploads');
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+const qrUploadDir = path.join(uploadDir, 'qr');
+if (!fs.existsSync(qrUploadDir)) {
+  fs.mkdirSync(qrUploadDir, { recursive: true });
+}
+const vouchersUploadDir = path.join(uploadDir, 'vouchers');
+if (!fs.existsSync(vouchersUploadDir)) {
+  fs.mkdirSync(vouchersUploadDir, { recursive: true });
+}
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, express.static(uploadDir));
 
 // Mount Modular Routes
 app.use(healthRoutes);
@@ -84,12 +107,12 @@ const distPath = path.join(__dirname, '../frontend/dist');
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
   app.use((req, res, next) => {
-    if ((req.method === 'GET' || req.method === 'HEAD') && !req.path.startsWith('/api') && !req.path.startsWith('/socket.io')) {
+    if ((req.method === 'GET' || req.method === 'HEAD') && !req.path.startsWith('/api') && !req.path.startsWith('/socket.io') && !req.path.startsWith('/uploads')) {
       return res.sendFile(path.join(distPath, 'index.html'));
     }
     next();
   });
-  console.log('📦 Frontend production build mounted from frontend/dist');
+  console.log('[STATIC] Frontend production build mounted from frontend/dist');
 }
 
 const PORT = process.env.PORT || 3001;
@@ -99,22 +122,22 @@ server.listen(PORT, () => {
 
 // Graceful shutdown handling for Docker, Kubernetes, PM2, and Cloud Platforms
 function gracefulShutdown(signal) {
-  console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`);
+  console.log(`\n[SHUTDOWN] Received ${signal}. Starting graceful shutdown...`);
   server.close(() => {
-    console.log('🔌 HTTP/WebSocket server closed.');
+    console.log('[SHUTDOWN] HTTP/WebSocket server closed.');
     db.close((err) => {
       if (err) {
         console.error('Error closing SQLite database:', err);
         process.exit(1);
       }
-      console.log('🗄️ SQLite database connection closed cleanly.');
+      console.log('[DB] SQLite database connection closed cleanly.');
       process.exit(0);
     });
   });
 
   // Force exit after 10s if connections fail to close
   setTimeout(() => {
-    console.error('⚠️ Could not close connections in time, forcefully shutting down.');
+    console.error('[WARN] Could not close connections in time, forcefully shutting down.');
     process.exit(1);
   }, 10000).unref();
 }
