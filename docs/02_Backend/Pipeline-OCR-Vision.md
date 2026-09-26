@@ -7,41 +7,41 @@ author: "PaySync Team"
 status: completado
 ---
 
-# 👁️ Pipeline de Visión Artificial y OCR Multimodal
+# Pipeline de Visión Artificial y OCR Multimodal
 
 La digitalización de facturas en PaySync utiliza una arquitectura de **procesamiento por etapas en cascada** (*waterfall pipeline*), combinando preprocesamiento digital de imágenes, modelos de visión multimodal de última generación (LLMs) y un motor de OCR local fuera de línea con validación matemática estricta.
 
 ---
 
-## 🏗️ Flujo de Procesamiento en Cascada
+## Flujo de Procesamiento en Cascada
 
 ```mermaid
 flowchart TD
-    Start["📸 Imagen de Factura (Upload / Cámara)"] --> Pre["🛠️ Preprocesamiento Jimp\n- Rotación (90°, 180°, 270°)\n- Downscale proporcional (máx 1800px)\n- Ajuste de contraste & escala de grises"]
+    Start["Imagen de Factura (Upload / Cámara)"] --> Pre["Preprocesamiento Jimp\n- Rotación (90°, 180°, 270°)\n- Downscale proporcional (máx 1800px)\n- Ajuste de contraste & escala de grises"]
     
     Pre --> CheckKey{"¿API Key de Gemini configurada?"}
     
-    CheckKey -- Sí --> GeminiCall["🤖 Inferencia Gemini Multimodal\n(gemini-2.0-flash / 1.5-flash / lite)"]
+    CheckKey -- Sí --> GeminiCall["Inferencia Gemini Multimodal\n(gemini-2.0-flash / 1.5-flash / lite)"]
     CheckKey -- No --> CheckOpenAI{"¿API Key de OpenAI?"}
     
-    GeminiCall -- Éxito --> Sanitize["🧮 Sanitización & Verificación Matemática"]
+    GeminiCall -- Éxito --> Sanitize["Sanitización & Verificación Matemática"]
     GeminiCall -- Fallo / Quota --> CheckOpenAI
     
-    CheckOpenAI -- Sí --> OpenAICall["🧠 Inferencia GPT-4o-mini Vision"]
-    CheckOpenAI -- No --> TesseractCall["📖 OCR Local Tesseract.js (Offline spa+eng)"]
+    CheckOpenAI -- Sí --> OpenAICall["Inferencia GPT-4o-mini Vision"]
+    CheckOpenAI -- No --> TesseractCall["OCR Local Tesseract.js (Offline spa+eng)"]
     
     OpenAICall -- Éxito --> Sanitize
     OpenAICall -- Fallo --> TesseractCall
     
-    TesseractCall --> RegexParse["🔍 Análisis Espacial y Regex Multilínea (COP / Latam)"]
+    TesseractCall --> RegexParse["Análisis Espacial y Regex Multilínea (COP / Latam)"]
     RegexParse --> Sanitize
     
-    Sanitize --> Output["🧾 JSON Estructurado Verificado\n(Items, Precios, Impuestos, Propina, Total)"]
+    Sanitize --> Output["JSON Estructurado Verificado\n(Items, Precios, Impuestos, Propina, Total)"]
 ```
 
 ---
 
-## 1. 🛠️ Preprocesamiento con Jimp (`imagePreprocessor.js`)
+## 1. Preprocesamiento con Jimp (`imagePreprocessor.js`)
 
 Los tickets de compra capturados por cámaras de teléfonos presentan frecuentemente problemas de orientación, sombras, alta resolución innecesaria y poco contraste en papel térmico.
 
@@ -54,7 +54,7 @@ Los tickets de compra capturados por cámaras de teléfonos presentan frecuentem
 
 ---
 
-## 2. 🤖 Modelos Multimodales en la Nube
+## 2. Modelos Multimodales en la Nube
 
 ### Google Gemini Vision
 - **Modelos prioritarios:** `gemini-2.0-flash`, `gemini-1.5-flash`, `gemini-1.5-flash-8b`.
@@ -66,7 +66,7 @@ Los tickets de compra capturados por cámaras de teléfonos presentan frecuentem
 
 ---
 
-## 3. 📖 Motor Offline Tesseract.js (`spa + eng`)
+## 3. Motor Offline Tesseract.js (`spa + eng`)
 
 Cuando no se configuran credenciales en la nube o el servidor opera en modo local/air-gapped:
 - Utiliza los archivos `spa.traineddata` y `eng.traineddata` almacenados localmente en `backend/`.
@@ -78,7 +78,7 @@ Cuando no se configuran credenciales en la nube o el servidor opera en modo loca
 
 ---
 
-## 4. 🧮 Sanitización y Verificación Matemática (`sanitizeAndVerifyBillData`)
+## 4. Sanitización y Verificación Matemática (`sanitizeAndVerifyBillData`)
 
 Independientemente del motor de extracción, todos los datos pasan por una capa de reconciliación determinista:
 - **Autocorrección de Cantidades:** Si la cantidad de un producto es 0 o nula, se ajusta a 1.
@@ -88,7 +88,7 @@ Independientemente del motor de extracción, todos los datos pasan por una capa 
 
 ---
 
-## 🔗 Navegación Rápida
+## Navegación Rápida
 - Regresar a: [[00_MOC_PaySync]]
 - Siguiente: [[02_Backend/Algoritmo-Liquidacion|Algoritmo de Liquidación de Deudas]]
 - Relacionado: [[05_Calidad-Testing/Plan-de-Pruebas|Plan de Pruebas y Cobertura QA]] | [[02_Backend/API-REST-Endpoints|Endpoints REST]]

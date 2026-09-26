@@ -1,8 +1,9 @@
 import { useState, useRef, useMemo } from 'react';
-import { X, QrCode, UploadCloud, Building2, Trash2 } from 'lucide-react';
+import { X, QrCode, UploadCloud, Building2, Trash2, Info, CheckCircle2 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useToast } from '../../context/ToastContext';
 import { API_URL, getUploadUrl } from '../../config/api';
+import { buildEmvCoPayload, validateEmvCoPayload } from '../../utils/emvcoQr';
 
 const KEY_TYPES = [
   { id: 'celular', label: 'Celular (10 dígitos)', placeholder: 'Ej. 3001234567' },
@@ -44,7 +45,14 @@ function ProfileKeyDialog({
     return qr.startsWith('/uploads/') || qr.startsWith('data:image/') || qr.startsWith('http');
   }, [currentProfile?.payment_qr]);
 
-  const [activeTab, setActiveTab] = useState(isImageQr ? 'upload' : 'generate');
+  // Check if existing QR is a valid EMVCo payload
+  const hasValidGeneratedQr = useMemo(() => {
+    const qr = currentProfile?.payment_qr || '';
+    return !isImageQr && validateEmvCoPayload(qr);
+  }, [currentProfile?.payment_qr, isImageQr]);
+
+  // Default to 'upload' as the primary recommended tab
+  const [activeTab, setActiveTab] = useState(hasValidGeneratedQr ? 'generate' : 'upload');
   const [qrFile, setQrFile] = useState(null);
   const [uploadedPreview, setUploadedPreview] = useState(
     isImageQr ? getUploadUrl(currentProfile?.payment_qr) : null
@@ -52,12 +60,17 @@ function ProfileKeyDialog({
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
-
-  // Live vector QR payload
+  // Live standard EMVCo payload
   const currentKeyTypeObj = KEY_TYPES.find((t) => t.id === keyType) || KEY_TYPES[0];
-  const generatedQrPayload = paymentKey.trim()
-    ? `bre-b://${bankEntity}/${encodeURIComponent(paymentKey.trim())}`
-    : `bre-b://${bankEntity}/pendiente`;
+  const generatedQrPayload = useMemo(() => {
+    if (!paymentKey.trim()) return '';
+    return buildEmvCoPayload({
+      name: profileName || currentProfile?.name || 'USUARIO',
+      key: paymentKey.trim(),
+      keyType,
+      bank: bankEntity,
+    });
+  }, [profileName, currentProfile?.name, paymentKey, keyType, bankEntity]);
 
   const handleFileChange = (file) => {
     if (!file) return;
@@ -116,8 +129,15 @@ function ProfileKeyDialog({
           finalQr = null;
         }
       } else {
-        // Tab Generate: store generated payload
-        finalQr = paymentKey.trim() ? generatedQrPayload : null;
+        // Tab Generate: store standard EMVCo payload
+        finalQr = paymentKey.trim()
+          ? buildEmvCoPayload({
+              name: profileName.trim(),
+              key: paymentKey.trim(),
+              keyType,
+              bank: bankEntity,
+            })
+          : null;
       }
 
       // Persist profile data via PUT
@@ -197,32 +217,19 @@ function ProfileKeyDialog({
           {/* Selector de modo QR */}
           <div>
             <label className="input-label" style={{ marginBottom: '0.5rem' }}>
-              Modalidad de Código QR Bre-B
+              Modalidad de Código QR
             </label>
-            <div className="tab-pill-container" style={{ display: 'flex', gap: '0.4rem', padding: '0.25rem', background: 'var(--bg-input)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
-              <button
-                type="button"
-                className={`tab-pill-btn ${activeTab === 'generate' ? 'active' : ''}`}
-                onClick={() => setActiveTab('generate')}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.45rem',
-                  padding: '0.55rem 0.75rem',
-                  borderRadius: 'var(--radius-sm)',
-                  fontSize: '0.85rem',
-                  fontWeight: '600',
-                  border: 'none',
-                  cursor: 'pointer',
-                  background: activeTab === 'generate' ? 'var(--brand-primary)' : 'transparent',
-                  color: activeTab === 'generate' ? '#ffffff' : 'var(--text-secondary)',
-                  transition: 'background var(--transition-fast), color var(--transition-fast)',
-                }}
-              >
-                <QrCode size={15} /> Generar QR Bre-B
-              </button>
+            <div
+              className="tab-pill-container"
+              style={{
+                display: 'flex',
+                gap: '0.4rem',
+                padding: '0.25rem',
+                background: 'var(--bg-input)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-subtle)',
+              }}
+            >
               <button
                 type="button"
                 className={`tab-pill-btn ${activeTab === 'upload' ? 'active' : ''}`}
@@ -244,133 +251,54 @@ function ProfileKeyDialog({
                   transition: 'background var(--transition-fast), color var(--transition-fast)',
                 }}
               >
-                <UploadCloud size={15} /> Subir Imagen de QR
+                <UploadCloud size={15} /> Subir QR Oficial (Recomendado)
+              </button>
+              <button
+                type="button"
+                className={`tab-pill-btn ${activeTab === 'generate' ? 'active' : ''}`}
+                onClick={() => setActiveTab('generate')}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem',
+                  padding: '0.55rem 0.75rem',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: '0.85rem',
+                  fontWeight: '600',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: activeTab === 'generate' ? 'var(--brand-primary)' : 'transparent',
+                  color: activeTab === 'generate' ? '#ffffff' : 'var(--text-secondary)',
+                  transition: 'background var(--transition-fast), color var(--transition-fast)',
+                }}
+              >
+                <QrCode size={15} /> Generar QR EMVCo
               </button>
             </div>
           </div>
 
-          {/* MODO A: GENERAR QR BRE-B */}
-          {activeTab === 'generate' && (
-            <div className="qr-generator-panel animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <div>
-                  <label className="input-label" htmlFor="key-type-select">
-                    Tipo de Llave
-                  </label>
-                  <div className="input-with-icon-wrapper" style={{ position: 'relative' }}>
-                    <select
-                      id="key-type-select"
-                      className="glass-input"
-                      value={keyType}
-                      onChange={(e) => setKeyType(e.target.value)}
-                      style={{ width: '100%', cursor: 'pointer' }}
-                    >
-                      {KEY_TYPES.map((t) => (
-                        <option key={t.id} value={t.id}>
-                          {t.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="input-label" htmlFor="bank-entity-select">
-                    Entidad Bancaria
-                  </label>
-                  <div className="input-with-icon-wrapper" style={{ position: 'relative' }}>
-                    <select
-                      id="bank-entity-select"
-                      className="glass-input"
-                      value={bankEntity}
-                      onChange={(e) => setBankEntity(e.target.value)}
-                      style={{ width: '100%', cursor: 'pointer' }}
-                    >
-                      {BANK_ENTITIES.map((b) => (
-                        <option key={b.id} value={b.id}>
-                          {b.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="input-label" htmlFor="payment-key-input">
-                  Valor de la Llave
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <input
-                    id="payment-key-input"
-                    type="text"
-                    className="glass-input num-tabular"
-                    value={paymentKey}
-                    onChange={(e) => setPaymentKey(e.target.value)}
-                    placeholder={currentKeyTypeObj.placeholder}
-                  />
-                </div>
-                <span className="text-subtle" style={{ display: 'block', marginTop: '0.35rem', fontSize: '0.78rem' }}>
-                  Número de cuenta, teléfono o identificador interoperable registrado.
-                </span>
-              </div>
-
-              {/* Vista previa en vivo del QR vectorial */}
-              <div
-                className="qr-live-preview-box"
-                style={{
-                  background: 'var(--bg-surface)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-lg)',
-                  padding: '1.25rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '0.85rem',
-                }}
-              >
-                <div className="qr-preview-tag" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                  <Building2 size={14} color="var(--brand-primary)" />
-                  <span>{BANK_ENTITIES.find((b) => b.id === bankEntity)?.name}</span>
-                  <span>•</span>
-                  <span>{currentKeyTypeObj.label}</span>
-                </div>
-
-                <div
-                  style={{
-                    background: '#ffffff',
-                    padding: '14px',
-                    borderRadius: '16px',
-                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.12)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <QRCodeSVG
-                    value={generatedQrPayload}
-                    size={150}
-                    level="M"
-                    fgColor="#0f172a"
-                    bgColor="#ffffff"
-                  />
-                </div>
-
-                <div style={{ textAlign: 'center' }}>
-                  <span className="num-tabular" style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-main)', letterSpacing: '0.04em' }}>
-                    {paymentKey.trim() || 'Ingresa tu llave arriba'}
-                  </span>
-                  <p className="text-subtle" style={{ margin: '0.15rem 0 0 0', fontSize: '0.75rem' }}>
-                    Vista previa vectorial compatible con lectores Bre-B y aplicaciones bancarias.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* MODO B: SUBIR IMAGEN DE QR */}
+          {/* PESTAÑA 1: SUBIR QR OFICIAL DE TU BANCO */}
           {activeTab === 'upload' && (
             <div className="qr-uploader-panel animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '0.75rem',
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '0.85rem 1rem',
+                  alignItems: 'flex-start',
+                }}
+              >
+                <Info size={18} style={{ color: 'var(--brand-primary)', flexShrink: 0, marginTop: '2px' }} />
+                <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: '1.45', color: 'var(--text-secondary)' }}>
+                  Para que Bancolombia, Nequi o cualquier banco lean tu QR al instante sin errores de compatibilidad, descarga la imagen de tu código QR desde tu app bancaria (&apos;Mi código QR&apos;) y súbela aquí.
+                </p>
+              </div>
+
               <div>
                 <label className="input-label" htmlFor="upload-key-input">
                   Llave de Pago de Respaldo (Opcional)
@@ -413,11 +341,11 @@ function ProfileKeyDialog({
                   <div
                     style={{
                       background: '#ffffff',
-                      padding: '8px',
-                      borderRadius: '14px',
+                      padding: '12px',
+                      borderRadius: '16px',
                       boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
-                      maxHeight: '180px',
-                      maxWidth: '180px',
+                      maxHeight: '190px',
+                      maxWidth: '190px',
                       overflow: 'hidden',
                       display: 'flex',
                       alignItems: 'center',
@@ -426,9 +354,14 @@ function ProfileKeyDialog({
                   >
                     <img
                       src={uploadedPreview}
-                      alt="Vista previa QR"
-                      style={{ maxHeight: '164px', maxWidth: '164px', objectFit: 'contain', borderRadius: '8px' }}
+                      alt="Vista previa QR oficial"
+                      style={{ maxHeight: '166px', maxWidth: '166px', objectFit: 'contain', borderRadius: '8px' }}
                     />
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78rem', color: 'var(--accent-mint)' }}>
+                    <CheckCircle2 size={15} />
+                    <span style={{ fontWeight: '600' }}>Imagen de QR lista para guardar</span>
                   </div>
 
                   <div style={{ display: 'flex', gap: '0.6rem', width: '100%' }}>
@@ -519,6 +452,160 @@ function ProfileKeyDialog({
             </div>
           )}
 
+          {/* PESTAÑA 2: GENERAR QR EMVCO */}
+          {activeTab === 'generate' && (
+            <div className="qr-generator-panel animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '0.75rem',
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '0.85rem 1rem',
+                  alignItems: 'flex-start',
+                }}
+              >
+                <Info size={18} style={{ color: 'var(--brand-primary)', flexShrink: 0, marginTop: '2px' }} />
+                <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: '1.45', color: 'var(--text-secondary)' }}>
+                  Genera un payload bajo el estándar EMVCo de Bre-B. Si tu banco requiere su código firmado de red, te recomendamos usar la pestaña de subir QR oficial.
+                </p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div>
+                  <label className="input-label" htmlFor="key-type-select">
+                    Tipo de Llave
+                  </label>
+                  <div className="input-with-icon-wrapper" style={{ position: 'relative' }}>
+                    <select
+                      id="key-type-select"
+                      className="glass-input"
+                      value={keyType}
+                      onChange={(e) => setKeyType(e.target.value)}
+                      style={{ width: '100%', cursor: 'pointer' }}
+                    >
+                      {KEY_TYPES.map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="input-label" htmlFor="bank-entity-select">
+                    Entidad Bancaria
+                  </label>
+                  <div className="input-with-icon-wrapper" style={{ position: 'relative' }}>
+                    <select
+                      id="bank-entity-select"
+                      className="glass-input"
+                      value={bankEntity}
+                      onChange={(e) => setBankEntity(e.target.value)}
+                      style={{ width: '100%', cursor: 'pointer' }}
+                    >
+                      {BANK_ENTITIES.map((b) => (
+                        <option key={b.id} value={b.id}>
+                          {b.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="input-label" htmlFor="payment-key-input">
+                  Valor de la Llave
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    id="payment-key-input"
+                    type="text"
+                    className="glass-input num-tabular"
+                    value={paymentKey}
+                    onChange={(e) => setPaymentKey(e.target.value)}
+                    placeholder={currentKeyTypeObj.placeholder}
+                  />
+                </div>
+                <span className="text-subtle" style={{ display: 'block', marginTop: '0.35rem', fontSize: '0.78rem' }}>
+                  Número de cuenta, teléfono o identificador interoperable registrado.
+                </span>
+              </div>
+
+              {/* Vista previa en vivo del QR EMVCo */}
+              <div
+                className="qr-live-preview-box"
+                style={{
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '1.25rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.85rem',
+                }}
+              >
+                <div className="qr-preview-tag" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                  <Building2 size={14} color="var(--brand-primary)" />
+                  <span>{BANK_ENTITIES.find((b) => b.id === bankEntity)?.name}</span>
+                  <span>•</span>
+                  <span>{currentKeyTypeObj.label}</span>
+                </div>
+
+                <div
+                  style={{
+                    background: '#ffffff',
+                    padding: '14px',
+                    borderRadius: '16px',
+                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.12)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {generatedQrPayload ? (
+                    <QRCodeSVG
+                      value={generatedQrPayload}
+                      size={150}
+                      level="M"
+                      fgColor="#0f172a"
+                      bgColor="#ffffff"
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: 150,
+                        height: 150,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--text-muted)',
+                        fontSize: '0.8rem',
+                        textAlign: 'center',
+                        padding: '1rem',
+                      }}
+                    >
+                      Ingresa tu llave para generar el QR
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ textAlign: 'center' }}>
+                  <span className="num-tabular" style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-main)', letterSpacing: '0.04em' }}>
+                    {paymentKey.trim() || 'Ingresa tu llave arriba'}
+                  </span>
+                  <p className="text-subtle" style={{ margin: '0.15rem 0 0 0', fontSize: '0.75rem' }}>
+                    Vista previa vectorial estándar EMVCo compatible con lectores Bre-B y aplicaciones bancarias.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Botones de acción */}
           <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.75rem' }}>
             <button
@@ -558,4 +645,3 @@ export default function ProfileKeyModal({ isOpen, ...props }) {
     />
   );
 }
-

@@ -7,17 +7,17 @@ author: "PaySync Team"
 status: completado
 ---
 
-# 🎨 Sistema de Diseño y Guía de Estilos TailwindCSS
+# Sistema de Diseño y Guía de Estilos TailwindCSS
 
 PaySync implementa una arquitectura visual **minimalista, fluida y mobile-first**, rediseñada para ofrecer máxima legibilidad, calma visual y rendimiento táctil superior tanto en dispositivos móviles de una mano como en pantallas de escritorio. La interfaz combina el paradigma **Bento Grid** con un **Glassmorphism sutil**, bordes milimétricos y microinteracciones de amortiguación elástica.
 
 ---
 
-## 🧭 Principios Fundamentales del Rediseño
+## Principios Fundamentales del Rediseño
 
 ```mermaid
 flowchart TD
-    subgraph Principios["💎 Pilares de Experiencia Visual (PaySync)"]
+    subgraph Principios["Pilares de Experiencia Visual (PaySync)"]
         MIN["Minimalismo Calmado\n(Carbono Mate & Porcelana Pura)"]
         MOB["Ergonomía Mobile-First\n(Thumb-Zone & FloatingActionDock)"]
         NUM["Estabilidad Financiera\n(Tipografía Tabular tabular-nums)"]
@@ -37,20 +37,20 @@ flowchart TD
 
 ---
 
-## 🎨 Paleta de Colores y Tokens Visuales Dual-Theme
+## Paleta de Colores y Tokens Visuales Dual-Theme
 
 El sistema cuenta con un motor dual de temas (*Dual-Theme Engine*) gestionado mediante variables CSS nativas vinculadas al atributo `data-theme="dark"` o `data-theme="light"` en el elemento raíz:
 
 ```mermaid
 flowchart LR
-    subgraph DarkTheme["🌙 Dark Mode (Default)"]
+    subgraph DarkTheme["Dark Mode (Default)"]
         D_BG["Carbono Mate (#0c0d12)"]
         D_SURF["Grafito Sutil (#14161f / #161822)"]
         D_CARD["Glass Card (rgba(20,22,31,0.88))"]
         D_ACC["Esmeralda Refinado (#10b981)"]
     end
 
-    subgraph LightTheme["☀️ Light Mode"]
+    subgraph LightTheme["Light Mode"]
         L_BG["Porcelana Pura (#fcfcfd)"]
         L_SURF["Blanco Arquitectónico (#ffffff)"]
         L_CARD["Pure Surface (#ffffff)"]
@@ -82,7 +82,7 @@ flowchart LR
 
 ---
 
-## 🔢 Tipografía y Estabilidad Numérica (`tabular-nums`)
+## Tipografía y Estabilidad Numérica (`tabular-nums`)
 
 En una plataforma de división de gastos y saldos en vivo, los números cambian con regularidad conforme ingresan transacciones por [[02_Backend/WebSockets-Eventos|WebSockets]] o liquidaciones del [[02_Backend/Algoritmo-Liquidacion|Algoritmo Greedy]]. 
 
@@ -109,19 +109,19 @@ body {
 
 ---
 
-## 📱 Ergonomía Mobile: `FloatingActionDock.jsx`
+## Ergonomía Mobile: `FloatingActionDock.jsx`
 
 Para satisfacer el principio de uso con una sola mano (*One-Handed Mobile UX*), se integró el componente flotante `FloatingActionDock.jsx`, anclado a la zona del pulgar:
 
 ```mermaid
 flowchart TD
-    subgraph MobileViewport["📱 Pantalla Móvil (< 768px)"]
+    subgraph MobileViewport["Pantalla Móvil (< 768px)"]
         Top["Navbar Fijo (Compacto)"]
         Content["Dashboard Bento Grid & Gastos (Scroll)"]
         Dock["FloatingActionDock.jsx (Fijo al Borde Inferior)"]
     end
 
-    subgraph DockActions["🕹️ Botonera de Acceso Rápido"]
+    subgraph DockActions["Botonera de Acceso Rápido"]
         Btn1["Smartphone Icon\nMi Llave / QR"]
         Btn2["Plus Icon Prominente (Elevado)\n+ Gasto Principal"]
         Btn3["Receipt Icon\nDividir Factura"]
@@ -156,7 +156,7 @@ flowchart TD
 
 ---
 
-## 🪟 Modales Fluidos Tipo Bottom Sheet
+## Modales Fluidos Tipo Bottom Sheet
 
 En smartphones, los modales centrados flotantes tradicionales resultan incómodos, requieren estirar los dedos hacia la parte superior y suelen sufrir recortes con los teclados virtuales. PaySync convierte automáticamente todos los modales en **Bottom Sheets táctiles** en resoluciones `< 768px`:
 
@@ -219,15 +219,15 @@ sequenceDiagram
 
 ---
 
-## ✨ Microinteracciones y Respuesta Háptica Visual
+## Microinteracciones y Respuesta Háptica Visual
 
 - **Active State Scale (`active:scale-[0.98]`):** Depresión sutil de 2% en botones, tarjetas clicables e items de liquidación que confirma el toque en pantallas táctiles sin retraso perceptivo.
-- **Transición de Tema sin Destellos:** Cambios de tema (Oscuro $\leftrightarrow$ Claro) con interpolación de color en 250ms (`var(--transition-normal)`).
+- **Transición de Tema sin Destellos:** Cambios de tema (Oscuro <-> Claro) con interpolación de color en 250ms (`var(--transition-normal)`).
 - **Backdrop Blur Gradual:** Desenfoque dinámico (`backdrop-filter: blur(16px)`) en la barra de navegación (`Navbar`) y en el `FloatingActionDock` para conservar la continuidad espacial de la vista.
 
 ---
 
-## 🔗 Navegación Rápida
+## Navegación Rápida
 - Regresar a: [[00_MOC_PaySync]]
 - Componentes: [[03_Frontend/Arbol-Componentes|Árbol de Componentes React 19]]
 - Estado y Reactividad: [[03_Frontend/Gestion-Estado|Gestión de Estado]]

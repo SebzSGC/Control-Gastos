@@ -7,13 +7,13 @@ author: "PaySync Team"
 status: completado
 ---
 
-# 🏛️ Arquitectura del Sistema y Diagrama C4
+# Arquitectura del Sistema y Diagrama C4
 
 El sistema **PaySync** está diseñado bajo una arquitectura web reactiva, modular y desacoplada, orientada al procesamiento en tiempo real de transacciones colaborativas y la digitalización inteligente de comprobantes de pago.
 
 ---
 
-## 📐 Niveles del Modelo C4
+## Niveles del Modelo C4
 
 ### Nivel 1: Diagrama de Contexto del Sistema
 
@@ -21,17 +21,17 @@ Describe cómo interactúan los usuarios finales con la plataforma PaySync y sus
 
 ```mermaid
 flowchart TD
-    UserA["👤 Usuario Host (Creador/Pagador)"]
-    UserB["👥 Participantes del Grupo (Compañeros)"]
+    UserA["Usuario Host (Creador/Pagador)"]
+    UserB["Participantes del Grupo (Compañeros)"]
     
-    subgraph PaySyncSystem["🌐 Plataforma PaySync"]
-        PaySync["💻 Aplicación Web PaySync\n(React 19 SPA + Express 5 API)"]
+    subgraph PaySyncSystem["Plataforma PaySync"]
+        PaySync["Aplicación Web PaySync\n(React 19 SPA + Express 5 API)"]
     end
     
-    subgraph ExternalServices["☁️ Servicios Externos"]
-        Gemini["🤖 Google Gemini Vision API\n(gemini-2.0-flash / 1.5-flash)"]
-        OpenAI["🧠 OpenAI GPT-4o-mini API\n(Fallback Multimodal)"]
-        PaymentNFC["📱 Terminales NFC / Billeteras\n(Bizum / CVU / Nequi / Bre-B)"]
+    subgraph ExternalServices["Servicios Externos"]
+        Gemini["Google Gemini Vision API\n(gemini-2.0-flash / 1.5-flash)"]
+        OpenAI["OpenAI GPT-4o-mini API\n(Fallback Multimodal)"]
+        PaymentNFC["Terminales NFC / Billeteras\n(Bizum / CVU / Nequi / Bre-B)"]
     end
 
     UserA -->|"Crea grupo, escanea tickets y divide facturas"| PaySync
@@ -49,20 +49,20 @@ Detalla los componentes lógicos que conforman la infraestructura de ejecución 
 
 ```mermaid
 flowchart TB
-    subgraph ClientLayer["🖥️ Capa de Presentación (Frontend SPA)"]
-        Browser["🌐 Navegador Web (Móvil / Desktop)"]
-        ReactApp["⚛️ React 19 SPA\n(Vite 8, TailwindCSS, Recharts)\nPuerto 80 o 3001"]
+    subgraph ClientLayer["Capa de Presentación (Frontend SPA)"]
+        Browser["Navegador Web (Móvil / Desktop)"]
+        ReactApp["React 19 SPA\n(Vite 8, TailwindCSS, Recharts)\nPuerto 80 o 3001"]
     end
 
-    subgraph ServerLayer["⚙️ Capa de Aplicación (Backend Node.js)"]
-        ExpressApp["⚡ Express 5 Server\n(API REST + Middlewares)\nPuerto 3001"]
-        SocketServer["📡 Socket.io Server v4\n(WebSockets en Tiempo Real)"]
-        VisionModule["👁️ Pipeline de Visión Artificial\n(Jimp + Tesseract.js spa+eng)"]
-        GreedyEngine["🧮 Motor de Liquidación Greedy\n(Min-Cash-Flow Algorithm)"]
+    subgraph ServerLayer["Capa de Aplicación (Backend Node.js)"]
+        ExpressApp["Express 5 Server\n(API REST + Middlewares)\nPuerto 3001"]
+        SocketServer["Socket.io Server v4\n(WebSockets en Tiempo Real)"]
+        VisionModule["Pipeline de Visión Artificial\n(Jimp + Tesseract.js spa+eng)"]
+        GreedyEngine["Motor de Liquidación Greedy\n(Min-Cash-Flow Algorithm)"]
     end
 
-    subgraph DataLayer["🗄️ Capa de Persistencia"]
-        SQLiteDB[("💾 SQLite 3 DB\n(WAL Mode, Foreign Keys On)\n/app/data/app_data.db")]
+    subgraph DataLayer["Capa de Persistencia"]
+        SQLiteDB[("SQLite 3 DB\n(WAL Mode, Foreign Keys On)\n/app/data/app_data.db")]
     end
 
     Browser -->|"HTTP / HTTPS (REST API)"| ExpressApp
@@ -79,7 +79,7 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    subgraph FrontendComponents["🎨 Componentes Frontend"]
+    subgraph FrontendComponents["Componentes Frontend"]
         DashView["Dashboard.jsx"]
         BentoCards["DashboardSummaryCards"]
         ExpList["ExpensesList"]
@@ -87,7 +87,7 @@ flowchart LR
         BillModal["BillSplitterModal"]
     end
 
-    subgraph BackendRoutes["🛣️ Enrutadores REST"]
+    subgraph BackendRoutes["Enrutadores REST"]
         GroupRoutes["groups.routes.js"]
         ExpenseRoutes["expenses.routes.js"]
         BillRoutes["bills.routes.js"]
@@ -95,7 +95,7 @@ flowchart LR
         NFCRoutes["nfc.routes.js"]
     end
 
-    subgraph BackendServices["⚙️ Servicios de Dominio"]
+    subgraph BackendServices["Servicios de Dominio"]
         SocketHandler["socketHandler.js"]
         ReceiptVision["receiptVisionService.js"]
         ImagePreproc["imagePreprocessor.js"]
@@ -114,7 +114,7 @@ flowchart LR
 
 ---
 
-## 🔒 Políticas y Principios Arquitectónicos
+## Políticas y Principios Arquitectónicos
 
 1. **Persistencia Ligera y Confiable (SQLite3):**
    - Habilitación forzada de integridad referencial: `PRAGMA foreign_keys = ON;`.
@@ -129,7 +129,7 @@ flowchart LR
 
 ---
 
-## 🔗 Navegación Rápida
+## Navegación Rápida
 - Regresar a: [[00_MOC_PaySync]]
 - Siguiente: [[01_Arquitectura/Base-de-Datos-ER|Modelo de Base de Datos y Esquema SQLite]]
 - Relacionado: [[02_Backend/API-REST-Endpoints|Catálogo de Endpoints REST]] | [[02_Backend/WebSockets-Eventos|Catálogo de Eventos WebSockets]]

@@ -15,19 +15,46 @@ import {
 import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
 import { useToast } from '../context/ToastContext';
 import { getUploadUrl } from '../config/api';
+import { buildEmvCoPayload } from '../utils/emvcoQr';
 
 /**
  * DigitalCard
  * Interactive payment display component:
  * 1. Virtual Card Mode: Contactless card aesthetic with chip and copyable key
- * 2. Bre-B QR Code Mode: High-contrast vector or uploaded QR with download, zoom, and voucher shortcut
+ * 2. Bre-B QR Code Mode: High-contrast vector or official uploaded QR with download, zoom, and voucher shortcut
  */
 export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState('card'); // 'card' | 'qr'
+  const qrCanvasRef = useRef(null);
+
+  const hasQrImage = Boolean(
+    profile?.payment_qr &&
+    (profile.payment_qr.startsWith('/uploads/') ||
+      profile.payment_qr.startsWith('data:image/') ||
+      profile.payment_qr.startsWith('http'))
+  );
+
+  // If user has uploaded an official bank QR, default directly to QR mode for instant scanning
+  const [activeTab, setActiveTab] = useState(hasQrImage ? 'qr' : 'card');
   const [copied, setCopied] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
-  const qrCanvasRef = useRef(null);
+
+  // Compute standard EMVCo payload if not using an uploaded image
+  let qrPayload = '';
+  if (!hasQrImage) {
+    if (profile?.payment_qr && profile.payment_qr.startsWith('000201')) {
+      qrPayload = profile.payment_qr;
+    } else if (profile?.payment_key) {
+      qrPayload = buildEmvCoPayload({
+        name: profile.name,
+        key: profile.payment_key,
+        keyType: 'celular',
+        bank: 'bre-b',
+      });
+    } else {
+      qrPayload = profile?.payment_qr || '';
+    }
+  }
 
   if (!profile) return null;
 
@@ -47,22 +74,14 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
     profile.payment_key.startsWith('3') &&
     profile.payment_key.length === 10;
 
-  const hasQrImage =
-    Boolean(profile.payment_qr) &&
-    (profile.payment_qr.startsWith('/uploads/') ||
-      profile.payment_qr.startsWith('data:image/') ||
-      profile.payment_qr.startsWith('http'));
-
-  const qrPayload = profile.payment_qr || profile.payment_key || '';
-  const hasPaymentData = Boolean(profile.payment_qr || profile.payment_key);
+  const hasPaymentData = Boolean(hasQrImage || qrPayload || profile.payment_key);
 
   const handleDownloadQr = () => {
     if (hasQrImage) {
-      // Download uploaded image
       const link = document.createElement('a');
       link.href = getUploadUrl(profile.payment_qr);
       link.target = '_blank';
-      link.download = `QR_BreB_${profile.name.replace(/\s+/g, '_')}.png`;
+      link.download = `QR_Oficial_${profile.name.replace(/\s+/g, '_')}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -221,7 +240,7 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
 
       {/* MODE 2: BRE-B QR CODE */}
       {activeTab === 'qr' && (
-        <div className="qr-card-surface animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="qr-card-surface animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
           {hasPaymentData ? (
             <div
               className="qr-display-container"
@@ -229,54 +248,96 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
                 background: 'var(--bg-surface)',
                 border: '1px solid var(--border-subtle)',
                 borderRadius: 'var(--radius-lg)',
-                padding: '1.5rem',
+                padding: '1.25rem 1rem',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '1rem',
+                gap: '0.85rem',
               }}
             >
-              {/* White contrast plate for QR reading */}
+              {/* Badge indicating QR source/type */}
+              <div>
+                {hasQrImage ? (
+                  <div
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      background: 'rgba(16, 185, 129, 0.12)',
+                      color: 'var(--accent-mint, #10b981)',
+                      border: '1px solid rgba(16, 185, 129, 0.25)',
+                      borderRadius: 'var(--radius-pill)',
+                      padding: '0.25rem 0.75rem',
+                      fontSize: '0.78rem',
+                      fontWeight: '600',
+                    }}
+                  >
+                    <ShieldCheck size={14} />
+                    <span>QR Oficial del Banco</span>
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      background: 'rgba(59, 130, 246, 0.12)',
+                      color: 'var(--brand-primary, #3b82f6)',
+                      border: '1px solid rgba(59, 130, 246, 0.25)',
+                      borderRadius: 'var(--radius-pill)',
+                      padding: '0.25rem 0.75rem',
+                      fontSize: '0.78rem',
+                      fontWeight: '600',
+                    }}
+                  >
+                    <QrCode size={14} />
+                    <span>QR Interoperable Bre-B</span>
+                  </div>
+                )}
+              </div>
+
+              {/* White contrast plate for instant QR scanning */}
               <div
                 className="qr-code-plate"
                 style={{
                   background: '#ffffff',
-                  padding: '14px',
-                  borderRadius: '16px',
-                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+                  padding: '18px',
+                  borderRadius: '20px',
+                  boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   position: 'relative',
-                  overflow: 'hidden',
+                  maxWidth: '220px',
+                  width: '100%',
                 }}
               >
                 {hasQrImage ? (
                   <img
                     src={getUploadUrl(profile.payment_qr)}
-                    alt={`QR Bre-B de ${profile.name}`}
+                    alt={`QR Oficial del Banco de ${profile.name}`}
                     style={{
-                      width: '180px',
-                      height: '180px',
+                      width: '184px',
+                      height: '184px',
                       objectFit: 'contain',
                       borderRadius: '8px',
+                      display: 'block',
                     }}
                   />
                 ) : (
                   <>
                     <QRCodeSVG
                       value={qrPayload}
-                      size={180}
+                      size={184}
                       level="M"
                       fgColor="#0f172a"
                       bgColor="#ffffff"
                     />
-                    {/* Hidden canvas for high-quality PNG export */}
                     <div style={{ display: 'none' }}>
                       <QRCodeCanvas
                         ref={qrCanvasRef}
                         value={qrPayload}
-                        size={360}
+                        size={380}
                         level="M"
                         fgColor="#0f172a"
                         bgColor="#ffffff"
@@ -287,12 +348,12 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
                 )}
               </div>
 
-              {/* Data & Identity */}
+              {/* Account Holder & Key Details */}
               <div style={{ textAlign: 'center', width: '100%' }}>
-                <span className="card-label" style={{ marginBottom: '0.2rem' }}>
+                <span className="card-label" style={{ marginBottom: '0.15rem' }}>
                   TITULAR DE LA CUENTA
                 </span>
-                <p style={{ fontWeight: '700', fontSize: '1rem', color: 'var(--text-main)', margin: '0 0 0.35rem 0' }}>
+                <p style={{ fontWeight: '700', fontSize: '0.98rem', color: 'var(--text-main)', margin: '0 0 0.35rem 0' }}>
                   {profile.name}
                 </p>
                 <div
@@ -307,7 +368,7 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
                   }}
                 >
                   <span className="num-tabular" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)' }}>
-                    {profile.payment_key || 'QR Interoperable'}
+                    {profile.payment_key || 'Pago por QR'}
                   </span>
                   {profile.payment_key && (
                     <button
@@ -330,43 +391,54 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
                 </div>
               </div>
 
-              {/* QR Tool Actions */}
+              {/* QR Utilities: Ampliar y Descargar */}
               <div
                 className="qr-tools-row"
                 style={{
                   display: 'flex',
                   gap: '0.5rem',
                   width: '100%',
-                  marginTop: '0.25rem',
                 }}
               >
                 <button
                   type="button"
                   className="btn-secondary active:scale-[0.98]"
-                  onClick={handleCopyKey}
-                  style={{ flex: 1, fontSize: '0.8rem', padding: '0.5rem 0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}
+                  onClick={() => setIsZoomed(true)}
+                  style={{ flex: 1, fontSize: '0.82rem', padding: '0.5rem 0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}
                 >
-                  {copied ? <Check size={14} color="var(--accent-mint)" /> : <Copy size={14} />}
-                  <span>{copied ? 'Copiada' : 'Copiar Llave'}</span>
+                  <Maximize2 size={14} />
+                  <span>Ampliar QR para Escanear</span>
                 </button>
                 <button
                   type="button"
                   className="btn-secondary active:scale-[0.98]"
                   onClick={handleDownloadQr}
-                  style={{ flex: 1, fontSize: '0.8rem', padding: '0.5rem 0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}
+                  style={{ flex: '0 0 auto', fontSize: '0.82rem', padding: '0.5rem 0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}
+                  title="Descargar QR"
                 >
                   <Download size={14} />
                   <span>Descargar</span>
                 </button>
-                <button
-                  type="button"
-                  className="btn-secondary active:scale-[0.98]"
-                  onClick={() => setIsZoomed(true)}
-                  style={{ flex: 1, fontSize: '0.8rem', padding: '0.5rem 0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}
-                >
-                  <Maximize2 size={14} />
-                  <span>Ampliar</span>
-                </button>
+              </div>
+
+              {/* Advice tip */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.55rem',
+                  background: 'var(--bg-input)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '0.65rem 0.85rem',
+                  width: '100%',
+                  textAlign: 'left',
+                }}
+              >
+                <Smartphone size={16} style={{ color: 'var(--brand-primary)', flexShrink: 0 }} />
+                <span style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                  Abre tu app bancaria (Bancolombia, Nequi o Daviplata), selecciona transferir con QR y apunta la cámara a este código.
+                </span>
               </div>
             </div>
           ) : (
@@ -412,16 +484,33 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
       )}
 
       {/* Primary Actions & Settlement Shortcut */}
-      <div className="digital-card-actions" style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-        {profile.payment_key && activeTab === 'card' && (
-          <button type="button" className="btn-primary copy-action-btn active:scale-[0.98]" onClick={handleCopyKey}>
+      <div className="digital-card-actions" style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', marginTop: '0.75rem' }}>
+        {/* Prominent Always-Visible Key Copy Button */}
+        {profile.payment_key && (
+          <button
+            type="button"
+            className="btn-primary copy-action-btn active:scale-[0.98]"
+            onClick={handleCopyKey}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              padding: '0.75rem 1rem',
+              fontSize: '0.88rem',
+              fontWeight: '600',
+            }}
+          >
             {copied ? (
               <>
-                <Check size={18} /> Llave Copiada al Portapapeles
+                <Check size={18} />
+                <span>Llave Copiada al Portapapeles</span>
               </>
             ) : (
               <>
-                <Copy size={18} /> Copiar Llave Bre-B / Nequi
+                <Copy size={18} />
+                <span>Copiar Llave (Celular / Documento)</span>
               </>
             )}
           </button>
@@ -437,7 +526,7 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
         {/* Visible Shortcut: 'Ya pagué: Subir Comprobante' */}
         <button
           type="button"
-          className="btn-primary voucher-shortcut-btn active:scale-[0.98]"
+          className="btn-secondary voucher-shortcut-btn active:scale-[0.98]"
           onClick={handleGoToVoucher}
           style={{
             width: '100%',
@@ -445,7 +534,9 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '0.5rem',
-            background: activeTab === 'qr' ? 'var(--brand-primary)' : undefined,
+            padding: '0.7rem 1rem',
+            fontSize: '0.86rem',
+            fontWeight: '600',
           }}
         >
           <Receipt size={17} />
@@ -457,14 +548,14 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
             type="button"
             className="btn-secondary active:scale-[0.98]"
             onClick={onClose}
-            style={{ width: '100%' }}
+            style={{ width: '100%', fontSize: '0.85rem' }}
           >
             Cerrar
           </button>
         )}
       </div>
 
-      {/* Lightbox / Zoomed QR Overlay */}
+      {/* Lightbox / Zoomed Full-Screen QR Overlay */}
       {isZoomed && (
         <div
           className="qr-zoom-overlay animate-fade-in"
@@ -472,7 +563,7 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(0, 0, 0, 0.88)',
+            background: 'rgba(0, 0, 0, 0.92)',
             backdropFilter: 'blur(8px)',
             zIndex: 9999,
             display: 'flex',
@@ -488,11 +579,11 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
               background: 'var(--bg-surface)',
               border: '1px solid var(--border-subtle)',
               borderRadius: '24px',
-              padding: '2rem 1.75rem',
+              padding: '1.75rem 1.5rem',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '1.25rem',
+              gap: '1.1rem',
               maxWidth: '380px',
               width: '100%',
               boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
@@ -500,12 +591,21 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
               <div>
-                <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)' }}>
-                  Código QR Bre-B
-                </h4>
-                <p className="text-subtle" style={{ margin: '0.15rem 0 0 0', fontSize: '0.8rem' }}>
-                  {profile.name}
-                </p>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    fontSize: '0.75rem',
+                    fontWeight: '700',
+                    color: hasQrImage ? 'var(--accent-mint)' : 'var(--brand-primary)',
+                    background: hasQrImage ? 'rgba(16, 185, 129, 0.12)' : 'rgba(59, 130, 246, 0.12)',
+                    padding: '0.2rem 0.6rem',
+                    borderRadius: 'var(--radius-pill)',
+                  }}
+                >
+                  {hasQrImage ? 'QR Oficial del Banco' : 'QR Interoperable Bre-B'}
+                </span>
               </div>
               <button
                 type="button"
@@ -516,6 +616,7 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
               </button>
             </div>
 
+            {/* High-contrast pure white card for maximum mobile camera readability */}
             <div
               style={{
                 background: '#ffffff',
@@ -525,18 +626,20 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                maxWidth: '280px',
+                width: '100%',
               }}
             >
               {hasQrImage ? (
                 <img
                   src={getUploadUrl(profile.payment_qr)}
-                  alt={`QR de ${profile.name}`}
-                  style={{ width: '250px', height: '250px', objectFit: 'contain' }}
+                  alt={`QR oficial de ${profile.name}`}
+                  style={{ width: '240px', height: '240px', objectFit: 'contain', borderRadius: '8px' }}
                 />
               ) : (
                 <QRCodeSVG
                   value={qrPayload}
-                  size={250}
+                  size={240}
                   level="M"
                   fgColor="#0f172a"
                   bgColor="#ffffff"
@@ -544,12 +647,17 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
               )}
             </div>
 
-            <div style={{ textAlign: 'center' }}>
-              <span className="num-tabular" style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)' }}>
-                {profile.payment_key || 'Pago Bre-B'}
-              </span>
-              <p className="text-subtle" style={{ margin: '0.2rem 0 0 0', fontSize: '0.78rem' }}>
-                Apunta con la cámara de tu app bancaria para escanear directamente.
+            <div style={{ textAlign: 'center', width: '100%' }}>
+              <p style={{ margin: 0, fontSize: '1.05rem', fontWeight: '700', color: 'var(--text-main)' }}>
+                {profile.name}
+              </p>
+              {profile.payment_key && (
+                <span className="num-tabular" style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                  {profile.payment_key}
+                </span>
+              )}
+              <p className="text-subtle" style={{ margin: '0.4rem 0 0 0', fontSize: '0.78rem', lineHeight: '1.4' }}>
+                Abre tu app bancaria (Bancolombia, Nequi o Daviplata), selecciona transferir con QR y apunta la cámara a este código.
               </p>
             </div>
 
@@ -559,7 +667,7 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
               onClick={() => setIsZoomed(false)}
               style={{ width: '100%' }}
             >
-              Listo
+              Cerrar Vista Ampliada
             </button>
           </div>
         </div>

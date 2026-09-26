@@ -7,7 +7,7 @@ author: "PaySync Team"
 status: completado
 ---
 
-# 📡 Catálogo de Eventos WebSockets (Socket.io)
+# Catálogo de Eventos WebSockets (Socket.io)
 
 PaySync integra **Socket.io v4** para ofrecer sincronización bidireccional en tiempo real entre múltiples dispositivos conectados a un mismo grupo de gastos o mesa de restaurante.
 
@@ -15,14 +15,14 @@ Cada grupo de gastos actúa como una **sala aislada** (*room*) identificada por 
 
 ---
 
-## 🔄 Flujo de Interacción Colaborativa (Sequence Diagram)
+## Flujo de Interacción Colaborativa (Sequence Diagram)
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Alice as 👤 Alice (Host)
-    participant Server as ⚙️ Socket.io Server
-    actor Bob as 👥 Bob (Participante)
+    actor Alice as Alice (Host)
+    participant Server as Socket.io Server
+    actor Bob as Bob (Participante)
 
     Alice->>Server: emit("join_group", "VIAJE2026")
     Bob->>Server: emit("join_group", "VIAJE2026")
@@ -45,7 +45,7 @@ sequenceDiagram
 
 ---
 
-## 📤 Eventos Cliente ➔ Servidor (Emitidos por el Frontend)
+## Eventos Cliente -> Servidor (Emitidos por el Frontend)
 
 ### 1. `join_group`
 Registra la conexión actual en la sala del grupo para recibir eventos específicos.
@@ -86,7 +86,7 @@ Cierra la sesión activa en SQLite y notifica el final de la repartición.
 
 ---
 
-## 📥 Eventos Servidor ➔ Cliente (Recibidos por el Frontend)
+## Eventos Servidor -> Cliente (Recibidos por el Frontend)
 
 | Evento | Origen / Disparador | Payload Principal | Acción en Frontend |
 | :--- | :--- | :--- | :--- |
@@ -102,7 +102,7 @@ Cierra la sesión activa en SQLite y notifica el final de la repartición.
 
 ---
 
-## 🛡️ Robustez y Resiliencia de la Conexión
+## Robustez y Resiliencia de la Conexión
 
 - **Reconexión Automática:** El cliente de React inicializa Socket.io con `reconnectionAttempts: 5` y timeout de 10 segundos.
 - **Sincronización Híbrida (WebSockets + REST):** En caso de reconexión tras pérdida de señal móvil, el frontend consulta `GET /api/bill-sessions/active/:groupId` para recuperar el estado exacto persistido en SQLite.
@@ -110,7 +110,7 @@ Cierra la sesión activa en SQLite y notifica el final de la repartición.
 
 ---
 
-## 🔗 Navegación Rápida
+## Navegación Rápida
 - Regresar a: [[00_MOC_PaySync]]
 - Siguiente: [[02_Backend/Pipeline-OCR-Vision|Pipeline OCR de Visión Artificial]]
 - Relacionado: [[01_Arquitectura/Diagrama-C4-Sistema|Diagrama C4 y Arquitectura]] | [[03_Frontend/Gestion-Estado|Manejo del Estado y Reactividad]]

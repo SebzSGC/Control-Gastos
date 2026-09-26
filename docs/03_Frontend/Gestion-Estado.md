@@ -7,28 +7,28 @@ author: "PaySync Team"
 status: completado
 ---
 
-# 🔄 Gestión de Estado, Context API y Reactividad
+# Gestión de Estado, Context API y Reactividad
 
 PaySync adopta un enfoque de gestión de estado ligero y puramente basado en los hooks nativos de **React 19** (`useState`, `useMemo`, `useCallback`, `useContext`), prescindiendo de dependencias externas pesadas como Redux o MobX.
 
 ---
 
-## 🏗️ Arquitectura de Estado Unificada
+## Arquitectura de Estado Unificada
 
 ```mermaid
 flowchart TD
-    subgraph GlobalProviders["🌐 Contextos Globales (App.jsx)"]
+    subgraph GlobalProviders["Contextos Globales (App.jsx)"]
         ThemeCtx["ThemeContext\n(Modo Dark/Light + LocalStorage)"]
         ToastCtx["ToastContext\n(Cola de Notificaciones no bloqueantes)"]
     end
 
-    subgraph DashboardState["📊 Estado Local de Sala (Dashboard.jsx)"]
+    subgraph DashboardState["Estado Local de Sala (Dashboard.jsx)"]
         LocalData["Datos de Grupo:\n- group, profiles, expenses, bills"]
         Settlements["Cálculos Derivados (useMemo):\n- balances, fairShare, totalSpent"]
         MeUser["Perfil Activo (LocalStorage):\n- paysync_{groupId}_profile"]
     end
 
-    subgraph RealTimeLayer["📡 Sincronización WebSockets (Socket.io)"]
+    subgraph RealTimeLayer["Sincronización WebSockets (Socket.io)"]
         SocketConn["Socket Client (io)"]
         IncomingEvents["Eventos:\n- expense_added\n- bill_item_claimed\n- profile_updated"]
     end
@@ -40,7 +40,7 @@ flowchart TD
 
 ---
 
-## 🎨 1. ThemeContext (`src/context/ThemeContext.jsx`)
+## 1. ThemeContext (`src/context/ThemeContext.jsx`)
 
 Controla la identidad visual del usuario con persistencia en `localStorage`.
 
@@ -51,7 +51,7 @@ Controla la identidad visual del usuario con persistencia en `localStorage`.
 
 ---
 
-## 🔔 2. ToastContext (`src/context/ToastContext.jsx`)
+## 2. ToastContext (`src/context/ToastContext.jsx`)
 
 Proporciona un sistema de retroalimentación inmediata, accesible y no invasivo para notificaciones transaccionales.
 
@@ -63,7 +63,7 @@ Proporciona un sistema de retroalimentación inmediata, accesible y no invasivo 
 
 ---
 
-## ⚡ 3. Sincronización Reactiva en `Dashboard.jsx`
+## 3. Sincronización Reactiva en `Dashboard.jsx`
 
 El orquestador central coordina el ciclo de vida de los datos del grupo y los eventos en vivo de [[02_Backend/WebSockets-Eventos|Socket.io]]:
 
@@ -105,7 +105,7 @@ newSocket.on('bill_item_claimed', ({ itemId, profileId, selected }) => {
 
 ---
 
-## 🔗 Navegación Rápida
+## Navegación Rápida
 - Regresar a: [[00_MOC_PaySync]]
 - Siguiente: [[03_Frontend/Guia-Estilos-Tailwind|Sistema de Diseño y Guía de Estilos]]
 - Relacionado: [[03_Frontend/Arbol-Componentes|Árbol de Componentes]] | [[02_Backend/WebSockets-Eventos|Catálogo de Eventos WebSockets]]
