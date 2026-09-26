@@ -17,8 +17,10 @@ import {
   BillDetailsModal,
   DeleteExpenseModal,
   PaymentInfoModal,
+  PaymentVoucherModal,
   FloatingActionDock,
 } from '../components/dashboard';
+
 
 import { useToast } from '../context/ToastContext';
 import { useTheme } from '../context/ThemeContext';
@@ -75,8 +77,16 @@ export default function Dashboard() {
   const [showModal, setShowModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedPayProfile, setSelectedPayProfile] = useState(null);
+  const [showVoucherModal, setShowVoucherModal] = useState(false);
+  const [voucherTarget, setVoucherTarget] = useState(null);
   const [expenseToDelete, setExpenseToDelete] = useState(null);
   const [isDeletingExpense, setIsDeletingExpense] = useState(false);
+
+  const handleOpenVoucherModal = useCallback((target) => {
+    setVoucherTarget(target);
+    setShowVoucherModal(true);
+  }, []);
+
 
   const fetchSettlements = useCallback(() => {
     fetch(`${API_URL}/groups/${id}/settlement`)
@@ -490,6 +500,7 @@ export default function Dashboard() {
             me={me}
             fairShare={fairShare}
             onSelectPayProfile={setSelectedPayProfile}
+            onOpenVoucherModal={handleOpenVoucherModal}
           />
         )}
 
@@ -537,7 +548,36 @@ export default function Dashboard() {
         <PaymentInfoModal
           profile={selectedPayProfile}
           onClose={() => setSelectedPayProfile(null)}
+          onOpenVoucherModal={(creditorProfile) => {
+            const debt = settlements.find((s) => s.from === me?.id && s.to === creditorProfile.id);
+            setSelectedPayProfile(null);
+            handleOpenVoucherModal({
+              creditor: creditorProfile,
+              amount: debt ? debt.amount : 0,
+              settlement: debt || null,
+            });
+          }}
         />
+
+        {/* Modal: Payment Voucher & Instant Settlement */}
+        {showVoucherModal && voucherTarget && (
+          <PaymentVoucherModal
+            isOpen={showVoucherModal}
+            onClose={() => {
+              setShowVoucherModal(false);
+              setVoucherTarget(null);
+            }}
+            groupId={id}
+            currentProfile={me}
+            targetCreditor={voucherTarget.creditor}
+            initialAmount={voucherTarget.amount || 0}
+            onSuccess={() => {
+              fetchSettlements();
+              setShowVoucherModal(false);
+              setVoucherTarget(null);
+            }}
+          />
+        )}
 
         {/* Modal: Confirm Delete Expense */}
         <DeleteExpenseModal
@@ -546,6 +586,7 @@ export default function Dashboard() {
           onConfirm={handleDeleteExpense}
           isDeleting={isDeletingExpense}
         />
+
 
         {/* Modal: Bill Splitter (Pago total mediante factura) */}
         {showBillModal && (

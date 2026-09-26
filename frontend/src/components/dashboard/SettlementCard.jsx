@@ -1,11 +1,17 @@
-import { Sparkles, CheckCircle2, ArrowRight, Wallet, Smartphone } from 'lucide-react';
+import { Sparkles, CheckCircle2, ArrowRight, Wallet, Smartphone, Receipt } from 'lucide-react';
 import { formatCOP } from '../../utils/formatters';
 
 /**
  * SettlementItem
  * Atomic card representing a single optimized debt payment from Member A to Member B.
  */
-export function SettlementItem({ settlement, profiles, me, onSelectPayProfile }) {
+export function SettlementItem({
+  settlement,
+  profiles,
+  me,
+  onSelectPayProfile,
+  onOpenVoucherModal,
+}) {
   const toProfile = profiles.find((p) => p.id === settlement.to);
   const isFromMe = settlement.from === me?.id;
   const isToMe = settlement.to === me?.id;
@@ -48,18 +54,49 @@ export function SettlementItem({ settlement, profiles, me, onSelectPayProfile })
       </div>
 
       {toProfile && (
-        <button
-          type="button"
-          className="btn-secondary settlement-pay-btn active:scale-[0.98]"
-          onClick={() => onSelectPayProfile(toProfile)}
-          title={`Ver datos de pago de ${settlement.to_name}`}
+        <div
+          className="settlement-actions-group"
+          style={{ display: 'flex', gap: '0.45rem', alignItems: 'center', flexWrap: 'wrap' }}
         >
-          <Wallet size={14} /> Pagar
-        </button>
+          <button
+            type="button"
+            className="btn-secondary settlement-pay-btn active:scale-[0.98]"
+            onClick={() => onSelectPayProfile(toProfile)}
+            title={`Ver datos de pago de ${settlement.to_name}`}
+          >
+            <Wallet size={14} /> Pagar
+          </button>
+
+          {isFromMe && (
+            <button
+              type="button"
+              className="btn-primary settlement-voucher-btn active:scale-[0.98]"
+              onClick={() =>
+                onOpenVoucherModal &&
+                onOpenVoucherModal({
+                  creditor: toProfile,
+                  amount: settlement.amount,
+                  settlement,
+                })
+              }
+              title={`Subir comprobante y liquidar deuda con ${settlement.to_name}`}
+              style={{
+                fontSize: '0.8rem',
+                padding: '0.45rem 0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+              }}
+            >
+              <Receipt size={14} /> Subir Comprobante
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
 }
+
 
 /**
  * MemberBalanceItem
@@ -149,6 +186,7 @@ export default function SettlementCard({
   me,
   fairShare = 0,
   onSelectPayProfile,
+  onOpenVoucherModal,
 }) {
   return (
     <div className="dashboard-tab-grid">
@@ -211,6 +249,7 @@ export default function SettlementCard({
                 profiles={profiles}
                 me={me}
                 onSelectPayProfile={onSelectPayProfile}
+                onOpenVoucherModal={onOpenVoucherModal}
               />
             ))}
           </div>
@@ -219,3 +258,4 @@ export default function SettlementCard({
     </div>
   );
 }
+

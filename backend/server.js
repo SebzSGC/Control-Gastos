@@ -65,7 +65,26 @@ app.use(cors({
   origin: corsOrigin,
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Static uploads directory serving
+const uploadDir = process.env.UPLOAD_DIR 
+  ? path.resolve(process.env.UPLOAD_DIR) 
+  : path.join(__dirname, 'uploads');
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+const qrUploadDir = path.join(uploadDir, 'qr');
+if (!fs.existsSync(qrUploadDir)) {
+  fs.mkdirSync(qrUploadDir, { recursive: true });
+}
+const vouchersUploadDir = path.join(uploadDir, 'vouchers');
+if (!fs.existsSync(vouchersUploadDir)) {
+  fs.mkdirSync(vouchersUploadDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadDir));
 
 // Mount Modular Routes
 app.use(healthRoutes);
@@ -89,7 +108,7 @@ if (fs.existsSync(distPath)) {
     }
     next();
   });
-  console.log('📦 Frontend production build mounted from frontend/dist');
+  console.log('[STATIC] Frontend production build mounted from frontend/dist');
 }
 
 const PORT = process.env.PORT || 3001;
@@ -99,22 +118,22 @@ server.listen(PORT, () => {
 
 // Graceful shutdown handling for Docker, Kubernetes, PM2, and Cloud Platforms
 function gracefulShutdown(signal) {
-  console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`);
+  console.log(`\n[SHUTDOWN] Received ${signal}. Starting graceful shutdown...`);
   server.close(() => {
-    console.log('🔌 HTTP/WebSocket server closed.');
+    console.log('[SHUTDOWN] HTTP/WebSocket server closed.');
     db.close((err) => {
       if (err) {
         console.error('Error closing SQLite database:', err);
         process.exit(1);
       }
-      console.log('🗄️ SQLite database connection closed cleanly.');
+      console.log('[DB] SQLite database connection closed cleanly.');
       process.exit(0);
     });
   });
 
   // Force exit after 10s if connections fail to close
   setTimeout(() => {
-    console.error('⚠️ Could not close connections in time, forcefully shutting down.');
+    console.error('[WARN] Could not close connections in time, forcefully shutting down.');
     process.exit(1);
   }, 10000).unref();
 }

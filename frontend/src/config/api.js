@@ -23,3 +23,17 @@ export const SOCKET_URL = rawSocketUrl || (
     ? (rawApiUrl.startsWith('http') ? new URL(rawApiUrl).origin : rawApiUrl)
     : '/'
 );
+
+/**
+ * Resuelve la URL absoluta o relativa para recursos subidos al servidor (QR, comprobantes, etc.)
+ */
+export const getUploadUrl = (filePath) => {
+  if (!filePath) return '';
+  if (filePath.startsWith('http://') || filePath.startsWith('https://') || filePath.startsWith('data:')) {
+    return filePath;
+  }
+  const base = API_URL.replace(/\/api$/, '');
+  const cleanPath = filePath.startsWith('/') ? filePath : `/${filePath}`;
+  return `${base}${cleanPath}`;
+};
+

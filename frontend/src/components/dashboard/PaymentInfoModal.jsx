@@ -5,7 +5,7 @@ import DigitalCard from '../DigitalCard';
  * PaymentInfoModal
  * Modal wrapper displaying a member's virtual digital payment card (Bre-B/Nequi).
  */
-export default function PaymentInfoModal({ profile, onClose }) {
+export default function PaymentInfoModal({ profile, onClose, onOpenVoucherModal }) {
   if (!profile) return null;
 
   return (
@@ -13,7 +13,7 @@ export default function PaymentInfoModal({ profile, onClose }) {
       <div
         className="modal-container animate-toast-in"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: '420px' }}
+        style={{ maxWidth: '440px' }}
       >
         <div className="sheet-drag-handle" />
         <div className="modal-header" style={{ marginBottom: '1rem' }}>
@@ -23,8 +23,9 @@ export default function PaymentInfoModal({ profile, onClose }) {
           </button>
         </div>
 
-        <DigitalCard profile={profile} onClose={onClose} />
+        <DigitalCard profile={profile} onClose={onClose} onOpenVoucherModal={onOpenVoucherModal} />
       </div>
     </div>
   );
 }
+

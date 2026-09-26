@@ -7,27 +7,29 @@ author: "PaySync Team"
 status: completado
 ---
 
-# 🧪 Plan de Pruebas y Estrategia QA
+# Plan de Pruebas y Estrategia QA
 
-PaySync cuenta con una batería de pruebas de integración y unitarias automatizadas que garantizan la estabilidad de los endpoints REST, el ciclo de vida de las sesiones en vivo y la precisión matemática del pipeline de visión artificial.
+PaySync cuenta con una batería de pruebas de integración y unitarias automatizadas que garantizan la estabilidad de los endpoints REST, el ciclo de vida de las sesiones en vivo, la precisión matemática del pipeline de visión artificial y la reconciliación transaccional de comprobantes de pago.
 
 ---
 
-## 🧭 Pirámide y Niveles de Testing
+## Pirámide y Niveles de Testing
 
 ```mermaid
 flowchart TD
-    E2E["🌐 Pruebas End-to-End & Concurrencia\n(Simulación NFC + Flujo de Comanda Viva con Sockets)"]
-    Integ["⚙️ Pruebas de Integración de Endpoints REST\n(backend/tests/test_api_endpoints.js - 8 Casos)"]
-    Unit["🔬 Pruebas Unitarias de Visión y Matemáticas\n(backend/tests/test_vision_pipeline.js - 3 Casos)"]
+    E2E["Pruebas End-to-End & Concurrencia\n(Simulación NFC + Flujo de Comanda Viva con Sockets)"]
+    Vouch["Pruebas de Comprobantes & Bre-B\n(backend/tests/test_voucher_settlement.js - 8 Casos)"]
+    Integ["Pruebas de Integración de Endpoints REST\n(backend/tests/test_api_endpoints.js - 8 Casos)"]
+    Unit["Pruebas Unitarias de Visión y Matemáticas\n(backend/tests/test_vision_pipeline.js - 3 Casos)"]
 
     Unit --> Integ
-    Integ --> E2E
+    Integ --> Vouch
+    Vouch --> E2E
 ```
 
 ---
 
-## 1. 👁️ Suite de Pruebas del Pipeline de Visión (`test_vision_pipeline.js`)
+## 1. Suite de Pruebas del Pipeline de Visión (`test_vision_pipeline.js`)
 
 Valida la robustez del motor OCR y las reglas de reconciliación monetaria:
 
@@ -48,7 +50,7 @@ node backend/tests/test_vision_pipeline.js
 
 ---
 
-## 2. ⚡ Suite de Integración de la API REST (`test_api_endpoints.js`)
+## 2. Suite de Integración de la API REST (`test_api_endpoints.js`)
 
 Se ejecuta en un entorno aislado con base de datos SQLite en memoria (`DATABASE_PATH=:memory:`) y puerto TCP efímero (`PORT=0`):
 
@@ -71,13 +73,36 @@ node backend/tests/test_api_endpoints.js
 
 ---
 
-## 3. 🎨 Verificación de Calidad Frontend
+## 3. Suite de Liquidación con Comprobantes y Bre-B (`test_voucher_settlement.js`)
+
+Valida la extracción heurística de comprobantes colombianos, la persistencia de imágenes y la extinción transaccional de saldos:
+
+```bash
+node backend/tests/test_voucher_settlement.js
+```
+
+### Casos Validados en Fase 4 QA
+
+| # | Escenario Evaluado | Entidades / Endpoints | Resultado QA |
+| :-: | :--- | :--- | :--- |
+| **1** | Heurísticas OCR para Bancos Colombianos | `voucherParserService.js` (Nequi, Bancolombia, Daviplata, Bre-B) | Aprobado (100% acierto en banco, monto y referencia) |
+| **2** | Configuración de Grupo y Perfiles | `POST /api/groups`, `POST /api/profiles` | Aprobado (Participantes acreedor y deudor creados) |
+| **3** | Almacenamiento de QR Bre-B (Payload e Imagen) | `PUT /api/profiles/:id`, `POST /api/profiles/:id/upload-qr` | Aprobado (Persistencia en SQLite y en `uploads/qr/`) |
+| **4** | Generación de Deuda Inicial | `POST /api/expenses`, `GET /api/groups/:id/settlement` | Aprobado (Deuda neta de $50.000 COP verificada) |
+| **5** | Liquidación con Comprobante (Modo JSON) | `POST /api/expenses/voucher-settlement` | Aprobado (Transacción de tipo `transfer` registrada) |
+| **6** | Recálculo Instantáneo de Balances | `GET /api/groups/:id/settlement` | Aprobado (Deuda extinguida: 0 transferencias pendientes) |
+| **7** | Liquidación con Carga Multipart de Imagen | `POST /api/expenses/voucher-settlement` (Multipart) | Aprobado (Archivo en `uploads/vouchers/` y balance a 0) |
+| **8** | Endpoint de Escaneo Efímero de Comprobante | `POST /api/expenses/scan-voucher` | Aprobado (Detección exitosa y eliminación de archivo temporal) |
+
+---
+
+## 4. Verificación de Calidad Frontend
 
 - **Compilación de Producción:**
   ```bash
   cd frontend && npm run build
   ```
-  Asegura que no existan errores de sintaxis, dependencias faltantes o problemas de bundle en Vite y React 19.
+  Asegura que no existan errores de sintaxis, dependencias faltantes o problemas de empaquetado en Vite y React 19.
 - **Análisis Estático (Linter):**
   ```bash
   cd frontend && npm run lint
@@ -86,17 +111,19 @@ node backend/tests/test_api_endpoints.js
 
 ---
 
-## 4. 🚀 Criterios de Aceptación para Producción
+## 5. Criterios de Aceptación para Producción
 
 Un despliegue a producción solo se considera aprobado si cumple simultáneamente con:
 1. `test_vision_pipeline.js`: 100% de aserciones aprobadas sin errores.
 2. `test_api_endpoints.js`: 8 de 8 pruebas de integración pasadas con éxito.
-3. Compilación de Vite limpia sin advertencias de dependencias circulares.
-4. Cobertura funcional documentada en la [[05_Calidad-Testing/Matriz-de-Trazabilidad|Matriz de Trazabilidad QA]].
+3. `test_voucher_settlement.js`: 8 de 8 pruebas de liquidación y escaneo aprobadas al 100%.
+4. Compilación de Vite limpia sin advertencias de dependencias circulares.
+5. Cobertura funcional documentada en la [[05_Calidad-Testing/Matriz-de-Trazabilidad|Matriz de Trazabilidad QA]].
 
 ---
 
-## 🔗 Navegación Rápida
+## Navegación Rápida
 - Regresar a: [[00_MOC_PaySync]]
 - Siguiente: [[05_Calidad-Testing/Matriz-de-Trazabilidad|Matriz de Requisitos vs. Cobertura QA]]
-- Relacionado: [[02_Backend/API-REST-Endpoints|Endpoints REST]] | [[02_Backend/Pipeline-OCR-Vision|Pipeline OCR]]
+- Comprobantes Backend: [[02_Backend/Comprobantes-Pago-OCR|Comprobantes de Pago Bancario y OCR]]
+- Módulo Frontend: [[03_Frontend/Generador-QR-Bre-B|Generador QR Bre-B]]

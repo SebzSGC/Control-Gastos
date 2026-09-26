@@ -2937,3 +2937,102 @@ button:active:not(:disabled) {
     flex: 1;
   }
 }
+
+/* ==========================================================================
+   BRE-B QR INTEROPERABLE & VOUCHER SETTLEMENT STYLES
+   ========================================================================== */
+
+.sheet-drag-handle {
+  display: none;
+}
+
+.qr-code-plate {
+  background: #ffffff !important;
+  padding: 14px;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-fast);
+}
+
+.qr-code-plate:hover {
+  transform: scale(1.02);
+}
+
+.qr-dropzone,
+.voucher-dropzone {
+  transition: all var(--transition-normal);
+}
+
+.qr-dropzone:hover,
+.voucher-dropzone:hover,
+.qr-dropzone.dragging,
+.voucher-dropzone.dragging {
+  border-color: var(--brand-primary) !important;
+  background: var(--primary-glow) !important;
+}
+
+.settlement-voucher-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+  transition: all var(--transition-fast);
+}
+
+.settlement-voucher-btn:hover {
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+  transform: translateY(-1px);
+}
+
+.voucher-shortcut-btn {
+  background: var(--brand-gradient);
+  color: #ffffff;
+  font-weight: 700;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+}
+
+@media (max-width: 640px) {
+  .voucher-modal-backdrop,
+  .modal-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .voucher-modal-container,
+  .modal-profile-key,
+  .modal-container {
+    max-width: 100% !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-top-left-radius: 24px !important;
+    border-top-right-radius: 24px !important;
+    max-height: 92vh !important;
+    padding: 1.5rem 1.25rem 2rem 1.25rem;
+    margin-bottom: 0 !important;
+    animation: slideUpSheet 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .sheet-drag-handle {
+    display: block;
+    width: 42px;
+    height: 4px;
+    background: var(--border-hover);
+    border-radius: var(--radius-full);
+    margin: -0.25rem auto 1rem auto;
+  }
+}
+
+@keyframes slideUpSheet {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}

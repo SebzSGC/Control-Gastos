@@ -28,6 +28,7 @@ frontend/dist/
 *.sqlite
 *.sqlite3
 data/
+*.traineddata
 
 # Uploads
 backend/uploads/*
