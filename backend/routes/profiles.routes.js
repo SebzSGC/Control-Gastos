@@ -106,8 +106,27 @@ router.put('/api/profiles/:id', (req, res) => {
       finalName = name.trim();
     }
 
-    const finalKey = payment_key !== undefined ? (payment_key || null) : existingProfile.payment_key;
-    const finalQr = payment_qr !== undefined ? (payment_qr || null) : existingProfile.payment_qr;
+    let finalKey = existingProfile.payment_key;
+    if (payment_key !== undefined) {
+      if (typeof payment_key === 'string') {
+        const trimmedKey = payment_key.trim();
+        finalKey = trimmedKey.length > 0 ? trimmedKey : null;
+      } else {
+        finalKey = payment_key || null;
+      }
+    }
+
+    let finalQr = existingProfile.payment_qr;
+    if (payment_qr !== undefined) {
+      if (typeof payment_qr === 'string') {
+        const trimmedQr = payment_qr.trim();
+        // Accepts relative paths (/uploads/qr/...), Base64 Data URLs (data:image/...), or EMVCo payloads without truncation
+        finalQr = trimmedQr.length > 0 ? trimmedQr : null;
+      } else {
+        finalQr = payment_qr || null;
+      }
+    }
+
     const targetGroupId = group_id || existingProfile.group_id;
 
     db.run("UPDATE profiles SET name = ?, payment_key = ?, payment_qr = ? WHERE id = ?", 
@@ -175,8 +194,20 @@ router.post('/api/profiles/:id/upload-qr', handleQrUpload, (req, res) => {
         return res.status(500).json({ error: updateErr.message });
       }
 
+      // Cleanup old uploaded QR file if exists
+      if (profile.payment_qr && typeof profile.payment_qr === 'string' && profile.payment_qr.startsWith('/uploads/qr/')) {
+        const oldFilename = path.basename(profile.payment_qr);
+        const oldFilePath = path.join(qrUploadDir, oldFilename);
+        if (fs.existsSync(oldFilePath) && oldFilePath !== req.file.path) {
+          fs.unlink(oldFilePath, () => {});
+        }
+      }
+
       const updatedProfile = {
-        ...profile,
+        id: profile.id,
+        group_id: profile.group_id,
+        name: profile.name,
+        payment_key: profile.payment_key,
         payment_qr: qrUrl
       };
 

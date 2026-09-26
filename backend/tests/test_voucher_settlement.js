@@ -208,7 +208,7 @@ async function runVoucherSettlementTests() {
     // ----------------------------------------------------
     console.log('[TEST 3] Updating creditor profile with Bre-B QR payload and file upload...');
 
-    // 3.1 Long Data URL / Bre-B payload via PUT /api/profiles/:id
+    // 3.1 Long Bre-B payload via PUT /api/profiles/:id
     const brebPayload = '00020101021226540010COM.BRE-B.WWW0114310987654302030015204000053031705802CO5915Carlos Acreedor6006Bogota6304ABCD';
     const putRes = await makeRequest({ ...baseUrl, path: `/api/profiles/${creditorId}`, method: 'PUT' }, {
       payment_qr: brebPayload
@@ -216,7 +216,15 @@ async function runVoucherSettlementTests() {
     assert.strictEqual(putRes.status, 200);
     assert.strictEqual(putRes.body.payment_qr, brebPayload);
 
-    // 3.2 File upload via POST /api/profiles/:id/upload-qr
+    // 3.2 Base64 Data URL via PUT /api/profiles/:id without truncation
+    const dataUrlPayload = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+    const putDataUrlRes = await makeRequest({ ...baseUrl, path: `/api/profiles/${creditorId}`, method: 'PUT' }, {
+      payment_qr: dataUrlPayload
+    });
+    assert.strictEqual(putDataUrlRes.status, 200);
+    assert.strictEqual(putDataUrlRes.body.payment_qr, dataUrlPayload);
+
+    // 3.3 File upload via POST /api/profiles/:id/upload-qr
     const boundary = '----WebKitFormBoundaryQRTest' + Date.now();
     // 1x1 valid PNG buffer
     const mockPngBuffer = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
@@ -235,6 +243,22 @@ async function runVoucherSettlementTests() {
     assert.strictEqual(qrUploadRes.status, 200);
     assert.ok(qrUploadRes.body.payment_qr.startsWith('/uploads/qr/'));
     assert.strictEqual(qrUploadRes.body.success, true);
+    assert.ok(qrUploadRes.body.profile);
+    assert.strictEqual(qrUploadRes.body.profile.id, creditorId);
+    assert.strictEqual(qrUploadRes.body.profile.payment_qr, qrUploadRes.body.payment_qr);
+
+    // 3.4 Static serving of uploaded QR with CORS and CORP headers
+    const qrStaticRes = await makeRequest({ ...baseUrl, path: qrUploadRes.body.payment_qr, method: 'GET' });
+    assert.strictEqual(qrStaticRes.status, 200);
+    assert.strictEqual(qrStaticRes.headers['access-control-allow-origin'], '*');
+    assert.strictEqual(qrStaticRes.headers['cross-origin-resource-policy'], 'cross-origin');
+
+    // 3.5 Updating profile with relative path via PUT
+    const relativePutRes = await makeRequest({ ...baseUrl, path: `/api/profiles/${creditorId}`, method: 'PUT' }, {
+      payment_qr: qrUploadRes.body.payment_qr
+    });
+    assert.strictEqual(relativePutRes.status, 200);
+    assert.strictEqual(relativePutRes.body.payment_qr, qrUploadRes.body.payment_qr);
 
     console.log('[PASSED] Test 3: Bre-B QR stored and uploaded via Multer with correct path.');
 

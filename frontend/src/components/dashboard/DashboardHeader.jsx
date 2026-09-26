@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Smartphone, Receipt, Plus, Wallet, Activity, Layers, ArrowLeft, Users } from 'lucide-react';
+import { Smartphone, Receipt, Plus, Wallet, Activity, Layers, Users } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 
 /**
@@ -35,19 +35,11 @@ export default function DashboardHeader({
       <div className="dashboard-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '0.85rem', flexWrap: 'wrap' }}>
         <button
           type="button"
-          onClick={() => navigate('/')}
-          className="btn-nav-action active:scale-[0.98]"
-          title="Salir de esta sala y volver a la pantalla de inicio"
-        >
-          <ArrowLeft size={15} /> <span>Volver al Menú Principal</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => navigate(`/group/${group?.id}`)}
+          onClick={() => navigate('/group/' + group?.id)}
           className="btn-nav-action active:scale-[0.98]"
           title="Seleccionar o cambiar el participante activo en esta sala"
         >
-          <Users size={15} /> <span>Cambiar de Participante ({currentProfile?.name})</span>
+          <Users size={14} /> <span>Cambiar Participante ({currentProfile?.name})</span>
         </button>
       </div>
 

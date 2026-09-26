@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sun, Moon, Copy, Check, ArrowLeft, Radio, Home, Users } from 'lucide-react';
+import { Sun, Moon, Copy, Check, ArrowLeft, Radio, Users } from 'lucide-react';
 import Logo from './Logo';
 import NFCShareModal from './NFCShareModal';
 import { useTheme } from '../context/ThemeContext';
@@ -73,15 +73,6 @@ export default function Navbar({
           <div className="navbar-right">
             {group && (
               <>
-                <button
-                  type="button"
-                  className="btn-navbar-exit"
-                  onClick={() => navigate('/')}
-                  title="Salir de la sala y volver al menú principal"
-                >
-                  <Home size={15} /> <span className="nav-btn-text">Menú Principal</span>
-                </button>
-
                 <button 
                   className="room-code-badge" 
                   onClick={handleCopyCode} 

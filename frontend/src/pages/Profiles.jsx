@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Plus, User, Smartphone, ArrowRight, ArrowLeft, X, RotateCw, AlertTriangle } from 'lucide-react';
+import { Plus, User, QrCode, ArrowRight, ArrowLeft, X, RotateCw, AlertTriangle } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { useToast } from '../context/ToastContext';
 import { API_URL } from '../config/api';
@@ -236,9 +236,9 @@ export default function Profiles() {
                 <span className="text-subtle">#{p.id.substring(0, 4).toUpperCase()}</span>
               </div>
 
-              {p.payment_key ? (
-                <span className="profile-badge-ready" title={`Llave: ${p.payment_key}`}>
-                  <Smartphone size={12} /> Llave lista
+              {p.payment_qr || p.payment_key ? (
+                <span className="profile-badge-ready" title={p.payment_qr ? 'Código QR Bre-B configurado' : `Llave: ${p.payment_key}`}>
+                  <QrCode size={12} /> {p.payment_qr ? 'QR Bre-B listo' : 'Llave lista'}
                 </span>
               ) : (
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>

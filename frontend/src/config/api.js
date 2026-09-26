@@ -32,8 +32,15 @@ export const getUploadUrl = (filePath) => {
   if (filePath.startsWith('http://') || filePath.startsWith('https://') || filePath.startsWith('data:')) {
     return filePath;
   }
-  const base = API_URL.replace(/\/api$/, '');
   const cleanPath = filePath.startsWith('/') ? filePath : `/${filePath}`;
-  return `${base}${cleanPath}`;
+  if (rawApiUrl && (rawApiUrl.startsWith('http://') || rawApiUrl.startsWith('https://'))) {
+    try {
+      const origin = new URL(rawApiUrl).origin;
+      return `${origin}${cleanPath}`;
+    } catch {
+      // fallback to cleanPath
+    }
+  }
+  return cleanPath;
 };
 

@@ -84,7 +84,11 @@ const vouchersUploadDir = path.join(uploadDir, 'vouchers');
 if (!fs.existsSync(vouchersUploadDir)) {
   fs.mkdirSync(vouchersUploadDir, { recursive: true });
 }
-app.use('/uploads', express.static(uploadDir));
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, express.static(uploadDir));
 
 // Mount Modular Routes
 app.use(healthRoutes);
@@ -103,7 +107,7 @@ const distPath = path.join(__dirname, '../frontend/dist');
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
   app.use((req, res, next) => {
-    if ((req.method === 'GET' || req.method === 'HEAD') && !req.path.startsWith('/api') && !req.path.startsWith('/socket.io')) {
+    if ((req.method === 'GET' || req.method === 'HEAD') && !req.path.startsWith('/api') && !req.path.startsWith('/socket.io') && !req.path.startsWith('/uploads')) {
       return res.sendFile(path.join(distPath, 'index.html'));
     }
     next();

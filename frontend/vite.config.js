@@ -17,6 +17,10 @@ export default defineConfig({
         target: backendTarget,
         changeOrigin: true
       },
+      '/uploads': {
+        target: backendTarget,
+        changeOrigin: true
+      },
       '/socket.io': {
         target: backendTarget,
         ws: true,
@@ -30,6 +34,10 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
+        target: backendTarget,
+        changeOrigin: true
+      },
+      '/uploads': {
         target: backendTarget,
         changeOrigin: true
       },
