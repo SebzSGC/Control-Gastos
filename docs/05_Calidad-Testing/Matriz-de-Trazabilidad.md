@@ -28,7 +28,7 @@ Esta matriz relaciona formalmente las capacidades funcionales del sistema PaySyn
 | **RF-09** | Soporte para temas Oscuro / Claro persistente | N/A | [[03_Frontend/Gestion-Estado\|`ThemeContext.jsx`]] | Inspección UI DOM (`data-theme`) | Validado |
 | **RF-10** | Monitoreo de salud del servicio para contenedores | [[02_Backend/API-REST-Endpoints\|`routes/health.routes.js`]] | `ColdStartBanner.jsx` | `test_api_endpoints.js` (Test 1) | Validado |
 | **RF-11** | Rediseño minimalista, ergonomía mobile-first y Bottom Sheets | N/A | [[03_Frontend/Arbol-Componentes\|`FloatingActionDock.jsx`]], [[03_Frontend/Guia-Estilos-Tailwind\|Guía Tailwind]] | Auditoría QA Fase 3 (`feat/minimalist-fluid-redesign`) | Aprobado |
-| **RF-12** | Generador vectorial y visor de códigos QR Bre-B | [[02_Backend/API-REST-Endpoints\|`routes/profiles.routes.js`]] | [[03_Frontend/Generador-QR-Bre-B\|`ProfileKeyModal.jsx`]], `DigitalCard.jsx` | `test_voucher_settlement.js` (Test 3) | Aprobado |
+| **RF-12** | Vectorización automática con jsQR, generador EMVCo y visor QR Bre-B | [[02_Backend/API-REST-Endpoints\|`routes/profiles.routes.js`]] | [[03_Frontend/Generador-QR-Bre-B\|`qrDecoder.js`, `ProfileKeyModal.jsx`, `DigitalCard.jsx`]] | `test_voucher_settlement.js` (Test 3) | Aprobado |
 | **RF-13** | Carga y OCR de comprobantes con extinción automática | [[02_Backend/Comprobantes-Pago-OCR\|`voucherParserService.js`]] | [[03_Frontend/Generador-QR-Bre-B\|`PaymentVoucherModal.jsx`]] | `test_voucher_settlement.js` (Tests 1, 4, 5, 6, 7, 8) | Aprobado |
 
 ---

@@ -98,6 +98,11 @@ node backend/tests/test_voucher_settlement.js
 
 ## 4. Verificación de Calidad Frontend
 
+- **Motor de Vectorización QR y Decodificación (`qrDecoder.js`):**
+  - Validación de decodificación en canvas en memoria con `jsQR` (`decodeQrFromImage`).
+  - Extracción regex de llaves Redeban Bre-B (`CO.COM.RBM.LLA...`), cédulas y celulares (`extractKeyFromPayload`).
+  - Renderizado vectorial matemático puro (`QRCodeSVG`) y exportación HD a PNG vía serialización XML.
+  - Validación de tolerancia a fallos: respaldo dual en SQLite (`profiles.payment_qr`) y almacenamiento en disco (`uploads/qr/`).
 - **Compilación de Producción:**
   ```bash
   cd frontend && npm run build

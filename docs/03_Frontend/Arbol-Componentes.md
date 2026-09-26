@@ -116,9 +116,9 @@ Todos los componentes modales incorporan soporte responsivo híbrido: se present
 | `AddTransactionModal.jsx` | Registro rápido de gastos o transferencias individuales. | Modal Centrado | Bottom Sheet con tirador táctil |
 | `BillSplitterModal.jsx` | Subida de ticket, Jimp + OCR y [[02_Backend/Pipeline-OCR-Vision|Pipeline Multimodal]]. | Modal Amplio (90vh) | Bottom Sheet de pantalla completa scrollable |
 | `LiveBillClaimModal.jsx` | Reclamación interactiva de platos en tiempo real vía [[02_Backend/WebSockets-Eventos|WebSockets]]. | Modal Amplio | Bottom Sheet interactivo con selección táctil |
-| `ProfileKeyModal.jsx` | Edición de clave bancaria (Bre-B, CVU, Nequi) y generación vectorial o carga de imagen QR. Ver [[03_Frontend/Generador-QR-Bre-B#1-configuración-de-llave-y-generador-vectorial-profilekeymodaljsx|Generador QR Bre-B]]. | Modal Centrado | Bottom Sheet con tirador táctil |
+| `ProfileKeyModal.jsx` | Edición de clave bancaria (Bre-B, Nequi), vectorización con jsQR y carga oficial. Ver [[03_Frontend/Generador-QR-Bre-B#1-configuracion-de-llave-y-carga-de-qr-profilekeymodaljsx|Generador QR Bre-B]]. | Modal Centrado | Bottom Sheet con tirador táctil |
 | `PaymentInfoModal.jsx` | Ficha de cobro del acreedor con copiado de alias y visualización QR mediante `DigitalCard.jsx`. | Modal Centrado | Bottom Sheet con tirador táctil |
-| `PaymentVoucherModal.jsx` | Carga de comprobante de pago bancario, pre-escaneo OCR y liquidación automática. Ver [[03_Frontend/Generador-QR-Bre-B#3-ergonomía-mobile-first-paymentvouchermodaljsx|PaymentVoucherModal]]. | Modal Centrado | Bottom Sheet con tirador táctil y tarjeta de deuda |
+| `PaymentVoucherModal.jsx` | Carga de comprobante de pago bancario, pre-escaneo OCR y liquidación automática. Ver [[03_Frontend/Generador-QR-Bre-B#4-ergonomia-mobile-first-paymentvouchermodaljsx|PaymentVoucherModal]]. | Modal Centrado | Bottom Sheet con tirador táctil y tarjeta de deuda |
 | `DeleteExpenseModal.jsx` | Diálogo de confirmación para eliminar una transacción registrada. | Modal Compacto | Bottom Sheet de acción rápida |
 | `BillDetailsModal.jsx` | Visualización detallada de items de una factura ya consolidada. | Modal Centrado | Bottom Sheet con scroll inercial |
 | `NFCScannerModal.jsx` | Lectura de tarjetas o terminales mediante Web NFC API. | Modal Centrado | Bottom Sheet con animación de radar |

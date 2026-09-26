@@ -12,19 +12,22 @@ import {
   Receipt,
   AlertCircle
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useToast } from '../context/ToastContext';
 import { getUploadUrl } from '../config/api';
+import { isVectorQrPayload } from '../utils/qrDecoder';
 
 /**
  * DigitalCard
  * Interactive payment display component:
  * 1. Virtual Card Mode: Contactless card aesthetic with chip and copyable key
- * 2. Bre-B QR Code Mode: Official bank QR image with download, zoom, and voucher shortcut
+ * 2. Bre-B QR Code Mode: High-definition vector QR (SVG) or official bank image with download, zoom, and voucher shortcut
  */
 export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
   const toast = useToast();
 
   const hasQr = Boolean(profile?.payment_qr);
+  const isVector = hasQr && isVectorQrPayload(profile.payment_qr);
   const hasKey = Boolean(profile?.payment_key);
 
   // If user has payment_qr or lacks payment_key, default directly to QR mode
@@ -52,18 +55,53 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
     profile.payment_key.length === 10;
 
   const handleDownloadQr = () => {
-    if (hasQr) {
-      const link = document.createElement('a');
-      link.href = getUploadUrl(profile.payment_qr);
-      link.target = '_blank';
-      link.download = `QR_Oficial_${profile.name.replace(/\s+/g, '_')}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      toast.success('Descargando imagen de QR');
+    if (!hasQr) {
+      toast.warning('No hay código QR disponible para descargar');
       return;
     }
-    toast.warning('No hay código QR disponible para descargar');
+
+    if (isVector) {
+      try {
+        const svgElement = document.querySelector('.qr-code-plate svg') || document.querySelector('.qr-vector-box svg');
+        if (svgElement) {
+          const svgData = new XMLSerializer().serializeToString(svgElement);
+          const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+          const url = URL.createObjectURL(svgBlob);
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 600;
+            canvas.height = 600;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 600, 600);
+            ctx.drawImage(img, 30, 30, 540, 540);
+            URL.revokeObjectURL(url);
+
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = `QR_Oficial_${profile.name.replace(/\s+/g, '_')}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            toast.success('Descargando código QR en alta definición');
+          };
+          img.src = url;
+          return;
+        }
+      } catch (e) {
+        console.error('Error al generar PNG desde SVG:', e);
+      }
+    }
+
+    const link = document.createElement('a');
+    link.href = getUploadUrl(profile.payment_qr);
+    link.target = '_blank';
+    link.download = `QR_Oficial_${profile.name.replace(/\s+/g, '_')}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Descargando imagen de QR');
   };
 
   const handleGoToVoucher = () => {
@@ -234,7 +272,11 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
                   }}
                 >
                   <ShieldCheck size={14} />
-                  <span>Código QR Bre-B Oficial</span>
+                  <span>
+                    {isVector
+                      ? 'Código QR Bre-B Oficial (Vectorial)'
+                      : 'Código QR Bre-B Oficial'}
+                  </span>
                 </div>
               </div>
 
@@ -243,7 +285,7 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
                 className="qr-code-plate"
                 style={{
                   background: '#ffffff',
-                  padding: '14px',
+                  padding: isVector ? '16px' : '14px',
                   borderRadius: '18px',
                   boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)',
                   display: 'inline-flex',
@@ -254,19 +296,28 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
                   width: 'fit-content',
                 }}
               >
-                <img
-                  src={getUploadUrl(profile.payment_qr)}
-                  alt={`Código QR Oficial de ${profile.name}`}
-                  style={{
-                    maxWidth: '100%',
-                    maxHeight: '320px',
-                    width: 'auto',
-                    height: 'auto',
-                    objectFit: 'contain',
-                    borderRadius: '10px',
-                    display: 'block',
-                  }}
-                />
+                {isVector ? (
+                  <QRCodeSVG
+                    value={profile.payment_qr}
+                    size={180}
+                    level="M"
+                    style={{ display: 'block', maxWidth: '100%' }}
+                  />
+                ) : (
+                  <img
+                    src={getUploadUrl(profile.payment_qr)}
+                    alt={`Código QR Oficial de ${profile.name}`}
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '320px',
+                      width: 'auto',
+                      height: 'auto',
+                      objectFit: 'contain',
+                      borderRadius: '10px',
+                      display: 'block',
+                    }}
+                  />
+                )}
               </div>
 
               {/* Account Holder & Key Details */}
@@ -534,7 +585,9 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
                     borderRadius: 'var(--radius-full)',
                   }}
                 >
-                  Código QR Bre-B Oficial
+                  {isVector
+                    ? 'Código QR Bre-B Oficial (Vectorial)'
+                    : 'Código QR Bre-B Oficial'}
                 </span>
               </div>
               <button
@@ -549,59 +602,61 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
               </button>
             </div>
 
-            {/* Smart Interactive Switcher Pill in Lightbox */}
-            <div
-              className="qr-lightbox-pill-toggle"
-              style={{
-                display: 'inline-flex',
-                background: 'var(--bg-input)',
-                padding: '0.25rem',
-                borderRadius: 'var(--radius-full)',
-                border: '1px solid var(--border-subtle)',
-                gap: '0.25rem',
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setFocusQr(false)}
+            {/* Smart Interactive Switcher Pill in Lightbox (only for uploaded images) */}
+            {!isVector && (
+              <div
+                className="qr-lightbox-pill-toggle"
                 style={{
-                  padding: '0.35rem 0.85rem',
+                  display: 'inline-flex',
+                  background: 'var(--bg-input)',
+                  padding: '0.25rem',
                   borderRadius: 'var(--radius-full)',
-                  fontSize: '0.78rem',
-                  fontWeight: '600',
-                  border: 'none',
-                  cursor: 'pointer',
-                  background: !focusQr ? 'var(--brand-primary)' : 'transparent',
-                  color: !focusQr ? '#ffffff' : 'var(--text-secondary)',
-                  transition: 'all var(--transition-fast)',
+                  border: '1px solid var(--border-subtle)',
+                  gap: '0.25rem',
                 }}
               >
-                Vista Completa
-              </button>
-              <button
-                type="button"
-                onClick={() => setFocusQr(true)}
-                style={{
-                  padding: '0.35rem 0.85rem',
-                  borderRadius: 'var(--radius-full)',
-                  fontSize: '0.78rem',
-                  fontWeight: '600',
-                  border: 'none',
-                  cursor: 'pointer',
-                  background: focusQr ? 'var(--brand-primary)' : 'transparent',
-                  color: focusQr ? '#ffffff' : 'var(--text-secondary)',
-                  transition: 'all var(--transition-fast)',
-                }}
-              >
-                Enfocar Código QR
-              </button>
-            </div>
+                <button
+                  type="button"
+                  onClick={() => setFocusQr(false)}
+                  style={{
+                    padding: '0.35rem 0.85rem',
+                    borderRadius: 'var(--radius-full)',
+                    fontSize: '0.78rem',
+                    fontWeight: '600',
+                    border: 'none',
+                    cursor: 'pointer',
+                    background: !focusQr ? 'var(--brand-primary)' : 'transparent',
+                    color: !focusQr ? '#ffffff' : 'var(--text-secondary)',
+                    transition: 'all var(--transition-fast)',
+                  }}
+                >
+                  Vista Completa
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFocusQr(true)}
+                  style={{
+                    padding: '0.35rem 0.85rem',
+                    borderRadius: 'var(--radius-full)',
+                    fontSize: '0.78rem',
+                    fontWeight: '600',
+                    border: 'none',
+                    cursor: 'pointer',
+                    background: focusQr ? 'var(--brand-primary)' : 'transparent',
+                    color: focusQr ? '#ffffff' : 'var(--text-secondary)',
+                    transition: 'all var(--transition-fast)',
+                  }}
+                >
+                  Enfocar Código QR
+                </button>
+              </div>
+            )}
 
             {/* High-contrast pure white card for maximum mobile camera readability */}
             <div
               style={{
                 background: '#ffffff',
-                padding: '14px',
+                padding: isVector ? '22px' : '14px',
                 borderRadius: '18px',
                 boxShadow: '0 8px 30px rgba(0, 0, 0, 0.25)',
                 display: 'flex',
@@ -613,22 +668,31 @@ export default function DigitalCard({ profile, onClose, onOpenVoucherModal }) {
                 overflow: 'hidden',
               }}
             >
-              <img
-                src={getUploadUrl(profile.payment_qr)}
-                alt={`Código QR oficial de ${profile.name}`}
-                style={{
-                  maxHeight: '60vh',
-                  maxWidth: '100%',
-                  width: 'auto',
-                  height: 'auto',
-                  objectFit: 'contain',
-                  borderRadius: '10px',
-                  display: 'block',
-                  transform: focusQr ? 'scale(1.42)' : 'scale(1)',
-                  transformOrigin: 'center 42%',
-                  transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                }}
-              />
+              {isVector ? (
+                <QRCodeSVG
+                  value={profile.payment_qr}
+                  size={280}
+                  level="M"
+                  style={{ display: 'block', maxWidth: '100%', height: 'auto' }}
+                />
+              ) : (
+                <img
+                  src={getUploadUrl(profile.payment_qr)}
+                  alt={`Código QR oficial de ${profile.name}`}
+                  style={{
+                    maxHeight: '60vh',
+                    maxWidth: '100%',
+                    width: 'auto',
+                    height: 'auto',
+                    objectFit: 'contain',
+                    borderRadius: '10px',
+                    display: 'block',
+                    transform: focusQr ? 'scale(1.42)' : 'scale(1)',
+                    transformOrigin: 'center 42%',
+                    transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                  }}
+                />
+              )}
             </div>
 
             <div style={{ textAlign: 'center', width: '100%' }}>

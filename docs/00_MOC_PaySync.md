@@ -67,7 +67,7 @@ flowchart TD
 - [[03_Frontend/Arbol-Componentes|Jerarquía de Componentes y Páginas]]: Estructura modular de vistas (`src/components/dashboard/`, páginas y modales).
 - [[03_Frontend/Gestion-Estado|Manejo del Estado y Reactividad]]: Context API (`ThemeContext`, `ToastContext`), sincronización con Sockets y persistencia local.
 - [[03_Frontend/Guia-Estilos-Tailwind|Sistema de Diseño y Temas]]: Paletas de color, tipografía, estética Bento Grid y soporte Dark/Light Mode.
-- [[03_Frontend/Generador-QR-Bre-B|Generador QR Bre-B, Estándar EMVCo y Vouchers]]: Especificación EMVCo (TLV y CRC-16/CCITT), carga prioritaria de QR oficial de banco, visualización en DigitalCard con Lightbox de alto contraste y flujo mobile-first en PaymentVoucherModal.
+- [[03_Frontend/Generador-QR-Bre-B|Generador QR Bre-B, Vectorización y Vouchers]]: Motor de vectorización automática con jsQR en canvas, extracción de llaves Bre-B, renderizado matemático puro (QRCodeSVG), especificación EMVCo (TLV y CRC-16/CCITT), respaldo dual (SQLite y disco) y visor DigitalCard con Lightbox.
 
 ### 4. DevOps, Contenedores e Infraestructura
 - [[04_DevOps-Despliegue/Guia-Docker-Compose|Orquestación con Docker Compose]]: Despliegue unificado y desacoplado (Nginx + Node.js).
