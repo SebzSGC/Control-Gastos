@@ -1,4 +1,4 @@
-import { Sparkles, CheckCircle2, ArrowRight, Wallet, Smartphone, Receipt } from 'lucide-react';
+import { Sparkles, CheckCircle2, ArrowRight, Wallet, Smartphone, Receipt, QrCode } from 'lucide-react';
 import { formatCOP } from '../../utils/formatters';
 
 /**
@@ -104,6 +104,7 @@ export function SettlementItem({
  */
 export function MemberBalanceItem({ member, isMe, onSelectPayProfile }) {
   const isPositive = member.balance >= 0;
+  const hasPaymentInfo = Boolean(member.payment_key || member.payment_qr);
 
   return (
     <div className="expense-item balance-member-item" style={{ marginBottom: 0 }}>
@@ -151,14 +152,27 @@ export function MemberBalanceItem({ member, isMe, onSelectPayProfile }) {
         </span>
 
         {!isMe && (
-          <button
-            type="button"
-            className="balance-pay-key-btn active:scale-[0.98]"
-            onClick={() => onSelectPayProfile(member)}
-            title={member.payment_key ? `Ver llave de ${member.name}` : 'Sin llave configurada'}
-          >
-            <Smartphone size={13} /> {member.payment_key ? 'Ver llave' : 'Sin llave'}
-          </button>
+          hasPaymentInfo ? (
+            <button
+              type="button"
+              className="balance-pay-key-btn balance-pay-key-btn--ready active:scale-[0.98]"
+              onClick={() => onSelectPayProfile(member)}
+              title={`Ver datos de pago de ${member.name}`}
+            >
+              <QrCode size={12} />
+              <span>Ver QR / Llave</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="balance-pay-key-btn balance-pay-key-btn--empty active:scale-[0.98]"
+              onClick={() => onSelectPayProfile(member)}
+              title={`${member.name} no ha configurado su llave o QR de pago`}
+            >
+              <Smartphone size={12} style={{ opacity: 0.6 }} />
+              <span>Sin llave</span>
+            </button>
+          )
         )}
       </div>
     </div>

@@ -1054,6 +1054,91 @@ button:active:not(:disabled) {
   color: var(--text-primary);
 }
 
+/* Balances Member Items & Payment Key/QR Buttons */
+.balance-member-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.balance-member-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.balance-member-text {
+  min-width: 0;
+}
+
+.balance-member-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.balance-pay-key-btn {
+  border-radius: var(--radius-full);
+  padding: 0.3rem 0.7rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  user-select: none;
+  border: 1px solid transparent;
+}
+
+.balance-pay-key-btn:active {
+  transform: scale(0.98);
+}
+
+.balance-pay-key-btn--ready {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  color: var(--brand-primary);
+}
+
+.balance-pay-key-btn--ready:hover {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(16, 185, 129, 0.36);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.18);
+  transform: translateY(-1px);
+}
+
+.balance-pay-key-btn--empty {
+  background: var(--bg-surface-elevated);
+  border: 1px dashed var(--border-subtle);
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .balance-pay-key-btn--empty {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="light"] .balance-pay-key-btn--empty {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.balance-pay-key-btn--empty:hover {
+  color: var(--text-secondary);
+  border-color: var(--border-hover);
+  background: var(--bg-card-hover);
+  transform: translateY(-1px);
+}
+
 /* ================= OCR SCANNER ZONE ================= */
 .upload-zone {
   border: 2px dashed var(--border-subtle);
@@ -2499,19 +2584,6 @@ button:active:not(:disabled) {
 
   .balance-member-amount {
     font-size: 0.98rem !important;
-  }
-
-  .balance-pay-key-btn {
-    background: transparent;
-    border: none;
-    color: var(--brand-primary);
-    font-size: 0.75rem;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    cursor: pointer;
-    padding: 0;
   }
 
   /* Settlements Cards */
