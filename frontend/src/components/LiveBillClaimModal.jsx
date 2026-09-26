@@ -144,6 +144,7 @@ export default function LiveBillClaimModal({
         onClick={e => e.stopPropagation()}
         style={{ maxWidth: '680px', maxHeight: '90vh' }}
       >
+        <div className="sheet-drag-handle" />
         {/* Header */}
         <div className="modal-header">
           <div className="modal-header-title-wrap">

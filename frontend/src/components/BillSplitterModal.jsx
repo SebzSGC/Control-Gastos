@@ -462,7 +462,7 @@ export default function BillSplitterModal({
   return (
     <div className="modal-backdrop" onClick={handleCloseModal}>
       <div className="modal-container modal-wide animate-scale-up" onClick={e => e.stopPropagation()}>
-        
+        <div className="sheet-drag-handle" />
         {/* Header */}
         <div className="modal-header">
           <div className="modal-header-title-wrap">

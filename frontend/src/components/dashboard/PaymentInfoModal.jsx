@@ -13,11 +13,12 @@ export default function PaymentInfoModal({ profile, onClose }) {
       <div
         className="modal-container animate-toast-in"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: '420px', padding: '2rem 1.5rem' }}
+        style={{ maxWidth: '420px' }}
       >
+        <div className="sheet-drag-handle" />
         <div className="modal-header" style={{ marginBottom: '1rem' }}>
           <h3 style={{ fontSize: '1.25rem', fontWeight: '700' }}>Datos para Transferir</h3>
-          <button type="button" className="modal-close-btn" onClick={onClose}>
+          <button type="button" className="modal-close-btn active:scale-[0.98]" onClick={onClose}>
             <X size={20} />
           </button>
         </div>

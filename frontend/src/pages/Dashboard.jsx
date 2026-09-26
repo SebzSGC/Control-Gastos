@@ -17,6 +17,7 @@ import {
   BillDetailsModal,
   DeleteExpenseModal,
   PaymentInfoModal,
+  FloatingActionDock,
 } from '../components/dashboard';
 
 import { useToast } from '../context/ToastContext';
@@ -452,7 +453,7 @@ export default function Dashboard() {
         onSwitchProfile={() => navigate(`/group/${id}`)}
       />
 
-      <main className="container dashboard-main-container animate-fade-in">
+      <main className="container dashboard-main-container pb-24 md:pb-8 animate-fade-in">
         {/* Real-time Live Bill Alert Banner */}
         <ActiveSessionsBanner
           activeLiveBill={activeLiveBill}
@@ -576,6 +577,13 @@ export default function Dashboard() {
         <BillDetailsModal
           bill={viewingBill}
           onClose={() => setViewingBill(null)}
+        />
+
+        {/* Mobile Quick Action Floating Dock */}
+        <FloatingActionDock
+          onOpenAddExpenseModal={() => setShowModal(true)}
+          onOpenBillModal={() => setShowBillModal(true)}
+          onOpenProfileModal={() => setShowProfileModal(true)}
         />
       </main>
     </>

@@ -62,9 +62,10 @@ export default function ProfileKeyModal({
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-container animate-toast-in" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-drag-handle" />
         <div className="modal-header">
           <h3 style={{ fontSize: '1.35rem', fontWeight: '700' }}>Mi Perfil & Llave de Pago</h3>
-          <button type="button" className="modal-close-btn" onClick={onClose}>
+          <button type="button" className="modal-close-btn active:scale-[0.98]" onClick={onClose}>
             <X size={20} />
           </button>
         </div>
@@ -102,7 +103,7 @@ export default function ProfileKeyModal({
           <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
             <button
               type="button"
-              className="btn-secondary"
+              className="btn-secondary active:scale-[0.98]"
               onClick={onClose}
               style={{ flex: 1 }}
             >
@@ -110,7 +111,7 @@ export default function ProfileKeyModal({
             </button>
             <button
               type="submit"
-              className="btn-primary"
+              className="btn-primary active:scale-[0.98]"
               style={{ flex: 1 }}
               disabled={isUpdating}
             >
