@@ -175,7 +175,7 @@ export default function NFCScannerModal({ isOpen, onClose }) {
           {resolvedRoom ? (
             <div style={{ background: 'var(--success-bg)', border: '1px solid var(--success-border)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)' }}>
               <span style={{ color: 'var(--success)', fontWeight: '700', fontSize: '1rem', display: 'block' }}>
-                ✓ ¡Sala {resolvedRoom.groupName} detectada!
+                ¡Sala {resolvedRoom.groupName} detectada!
               </span>
               <span className="text-subtle">Redirigiendo automáticamente...</span>
             </div>

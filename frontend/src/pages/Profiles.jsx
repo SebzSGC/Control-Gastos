@@ -135,7 +135,7 @@ export default function Profiles() {
           <p className="text-muted" style={{ fontWeight: '600' }}>Cargando sala y participantes...</p>
           {slowLoad && (
             <p className="animate-fade-in" style={{ fontSize: '0.85rem', color: 'var(--accent, #06b6d4)', maxWidth: '380px', lineHeight: '1.4' }}>
-              ☁️ Despertando servidor en la nube (Render Free Tier)... Esto puede tomar unos segundos la primera vez.
+              Despertando servidor en la nube (Render Free Tier)... Esto puede tomar unos segundos la primera vez.
             </p>
           )}
         </div>

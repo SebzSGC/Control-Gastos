@@ -155,7 +155,7 @@ export default function Dashboard() {
     });
 
     newSocket.on('peer_joined_nfc', (data) => {
-      toast.success(data?.message || '¡Un compañero se unió mediante NFC! 📡');
+      toast.success(data?.message || '¡Un compañero se unió mediante NFC!');
     });
 
     // Real-time Live Bill Split events
@@ -163,7 +163,7 @@ export default function Dashboard() {
       if (data && data.hostProfileId !== me?.id) {
         setActiveLiveBill(data);
         toast.info(
-          `🧾 Cuenta Abierta en Vivo: ${data.hostName} subió la factura de "${data.storeName}". Toca aquí para marcar tus consumos.`
+          `Cuenta Abierta en Vivo: ${data.hostName} subió la factura de "${data.storeName}". Toca aquí para marcar tus consumos.`
         );
       }
     });
@@ -436,7 +436,7 @@ export default function Dashboard() {
                 lineHeight: '1.4',
               }}
             >
-              ☁️ Despertando servidor en la nube (Render Free Tier)... Esto puede tomar unos segundos la primera vez.
+              Despertando servidor en la nube (Render Free Tier)... Esto puede tomar unos segundos la primera vez.
             </p>
           )}
         </div>

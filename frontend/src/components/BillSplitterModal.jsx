@@ -75,7 +75,7 @@ export default function BillSplitterModal({
         });
 
         if (data.profileId !== currentProfile?.id) {
-          showToast(`🍽️ ${data.profileName || 'Un integrante'} marcó: ${data.itemName || 'un plato'}`, 'info');
+          showToast(`${data.profileName || 'Un integrante'} marcó: ${data.itemName || 'un plato'}`, 'info');
         }
       }
     };
@@ -162,7 +162,7 @@ export default function BillSplitterModal({
         const isVision = data.engineUsed?.includes('vision');
         showToast(
           isVision
-            ? `⚡ ¡Factura analizada con IA Multimodal! ${data.items.length} productos extraídos.`
+            ? `¡Factura analizada con IA Multimodal! ${data.items.length} productos extraídos.`
             : `Factura analizada con escáner local. ${data.items.length} productos detectados.`,
           'success'
         );
@@ -382,7 +382,7 @@ export default function BillSplitterModal({
       socket.emit('bill_session_started', liveData);
     }
     setIsLiveSessionActive(true);
-    showToast('📡 ¡Reparto en vivo activado! Notificación enviada al grupo.', 'success');
+    showToast('¡Reparto en vivo activado! Notificación enviada al grupo.', 'success');
     setStep(3); // Advance directly to assignment step
   };
 
@@ -551,7 +551,7 @@ export default function BillSplitterModal({
                     setShowKeyModal(true);
                   }}
                 >
-                  <Key size={14} /> {isAiActive ? 'Configurar Motor IA' : 'Activar IA Gemini Gratis ⚡'}
+                  <Key size={14} /> {isAiActive ? 'Configurar Motor IA' : 'Activar IA Gemini Gratis'}
                 </button>
               </div>
 
@@ -666,7 +666,7 @@ export default function BillSplitterModal({
                     onClick={handleStartLiveSession}
                     title="Transmitir la cuenta a todos los teléfonos del grupo en tiempo real"
                   >
-                    <Radio size={14} className="pulse-icon" /> 📡 Repartir en Vivo con el Grupo
+                    <Radio size={14} className="pulse-icon" /> Repartir en Vivo con el Grupo
                   </button>
                   <button type="button" className="btn-secondary btn-sm" onClick={handleAddItem}>
                     <Plus size={14} /> Agregar Producto
@@ -848,7 +848,7 @@ export default function BillSplitterModal({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                     <span className="live-pulse-dot" style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#06b6d4', boxShadow: '0 0 10px #06b6d4' }}></span>
                     <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                      📡 Sesión en Vivo Activa: Los participantes marcan sus platos desde sus teléfonos en tiempo real.
+                      Sesión en Vivo Activa: Los participantes marcan sus platos desde sus teléfonos en tiempo real.
                     </span>
                   </div>
                   <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-mint)', background: 'rgba(16, 185, 129, 0.15)', padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-pill)' }}>
@@ -1086,7 +1086,7 @@ export default function BillSplitterModal({
               onClick={handleStartLiveSession}
               style={{ marginRight: 'auto' }}
             >
-              <Radio size={16} /> 📡 Repartir en Vivo con el Grupo
+              <Radio size={16} /> Repartir en Vivo con el Grupo
             </button>
           )}
 

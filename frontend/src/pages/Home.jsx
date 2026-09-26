@@ -204,7 +204,7 @@ export default function Home() {
 
               {/* Quick suggestion pills */}
               <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                {['✈️ Viaje', '🏠 Arriendo', '🍕 Cenas', '🎬 Netflix & Spotify'].map((tag) => (
+                {['Viaje', 'Arriendo', 'Cenas', 'Entretenimiento'].map((tag) => (
                   <button
                     key={tag}
                     type="button"
@@ -235,7 +235,7 @@ export default function Home() {
               </button>
               {slowSubmit && (
                 <p className="animate-fade-in text-subtle" style={{ textAlign: 'center', marginTop: '0.5rem', color: 'var(--accent, #06b6d4)', fontSize: '0.8rem' }}>
-                  ☁️ El servidor en la nube está despertando (Render Free Tier). Solo tarda unos segundos...
+                  El servidor en la nube está despertando (Render Free Tier). Solo tarda unos segundos...
                 </p>
               )}
             </form>
@@ -287,7 +287,7 @@ export default function Home() {
                 </button>
                 {slowSubmit && (
                   <p className="animate-fade-in text-subtle" style={{ textAlign: 'center', marginTop: '0.5rem', color: 'var(--accent, #06b6d4)', fontSize: '0.8rem' }}>
-                    ☁️ El servidor en la nube está despertando (Render Free Tier). Solo tarda unos segundos...
+                    El servidor en la nube está despertando (Render Free Tier). Solo tarda unos segundos...
                   </p>
                 )}
               </form>

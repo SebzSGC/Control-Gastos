@@ -48,7 +48,7 @@ export default function LiveBillClaimModal({
         });
 
         if (data.profileId !== currentProfile?.id) {
-          showToast(`🍽️ ${data.profileName} marcó: ${data.itemName || 'un plato'}`, 'info');
+          showToast(`${data.profileName} marcó: ${data.itemName || 'un plato'}`, 'info');
         }
       }
     };
@@ -194,7 +194,7 @@ export default function LiveBillClaimModal({
               </span>
             </div>
             <span style={{ fontSize: '0.8rem', color: 'var(--accent-mint)', fontWeight: '600' }}>
-              ⚡ Sincronización en vivo activa
+              Sincronización en vivo activa
             </span>
           </div>
 
