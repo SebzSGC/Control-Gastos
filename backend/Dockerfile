@@ -11,7 +11,8 @@ WORKDIR /app
 
 ENV NODE_ENV=production \
     PORT=3001 \
-    DATABASE_PATH=/app/data/app_data.db
+    DATABASE_PATH=/app/data/app_data.db \
+    UPLOAD_DIR=/app/uploads
 
 COPY package*.json ./
 RUN npm ci --omit=dev

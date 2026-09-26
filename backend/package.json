@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "node tests/test_vision_pipeline.js"
+    "test": "node tests/test_vision_pipeline.js && node tests/test_api_endpoints.js"
   },
   "keywords": [],
   "author": "",

@@ -27,6 +27,8 @@ services:
         value: 10000
       - key: DATABASE_PATH
         value: /data/app_data.db
+      - key: UPLOAD_DIR
+        value: /data/uploads
       - key: CORS_ORIGIN
         value: "*"
       - key: GEMINI_API_KEY

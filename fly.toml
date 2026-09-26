@@ -12,6 +12,7 @@ primary_region = "bog"
   NODE_ENV = "production"
   PORT = "8080"
   DATABASE_PATH = "/data/app_data.db"
+  UPLOAD_DIR = "/data/uploads"
   CORS_ORIGIN = "*"
 
 [mounts]

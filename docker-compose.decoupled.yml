@@ -16,6 +16,7 @@ services:
       - NODE_ENV=production
       - PORT=3001
       - DATABASE_PATH=/app/data/app_data.db
+      - UPLOAD_DIR=/app/uploads
       - CORS_ORIGIN=*
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}

@@ -114,4 +114,6 @@ En lugar de cargar decenas de herramientas y reglas globales en el contexto, el 
 ## 6. Recursos Adicionales
 
 - [Referencia completa del esquema y campos](./references/custom-agent-schema.md)
-- [Ejemplo: Agente especialista en frontend y UI](./examples/frontend-redesign-agent.md)
+- [Ejemplo oficial del blog: Dependency Modernizer](./examples/dependency-modernizer.md)
+- [Ejemplo avanzado: Agente especialista en frontend y UI](./examples/frontend-redesign-agent.md)
+

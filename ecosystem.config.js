@@ -16,11 +16,14 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         PORT: 3001,
-        DATABASE_PATH: './backend/app_data.db'
+        DATABASE_PATH: './backend/app_data.db',
+        UPLOAD_DIR: './backend/uploads'
       },
       env_production: {
         NODE_ENV: 'production',
-        PORT: 3001
+        PORT: 3001,
+        DATABASE_PATH: './backend/app_data.db',
+        UPLOAD_DIR: './backend/uploads'
       },
       error_file: './logs/pm2-error.log',
       out_file: './logs/pm2-out.log',

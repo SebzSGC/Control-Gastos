@@ -1,0 +1,210 @@
+{
+  "main": {
+    "id": "da6dc88da2fd4962",
+    "type": "split",
+    "children": [
+      {
+        "id": "194bf935f585f6b4",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e489d159ae516d62",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "04_DevOps-Despliegue/Despliegue-Cloud.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Despliegue-Cloud"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "7e9e652943d320f0",
+    "type": "split",
+    "children": [
+      {
+        "id": "21b422e01fa46e58",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "379ce028c32b6d5c",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Explorador de archivos"
+            }
+          },
+          {
+            "id": "38e323aa45261581",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Buscar"
+            }
+          },
+          {
+            "id": "f34d93fbb19d1bf0",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "Marcadores"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "f01d81e4ef7dbcea",
+    "type": "split",
+    "children": [
+      {
+        "id": "4d4c8fe7916232d3",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "4fbc2c29828a20bd",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "04_DevOps-Despliegue/Despliegue-Cloud.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Enlaces entrantes"
+            }
+          },
+          {
+            "id": "94962566c8daf71c",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "04_DevOps-Despliegue/Despliegue-Cloud.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Enlaces salientes"
+            }
+          },
+          {
+            "id": "26494bc788d5542a",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Etiquetas"
+            }
+          },
+          {
+            "id": "19233afb3b21a885",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Todas las propiedades"
+            }
+          },
+          {
+            "id": "5388e47ec6b1360f",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "04_DevOps-Despliegue/Despliegue-Cloud.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Esquema"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Abrir selector rápido": false,
+      "graph:Abrir vista gráfica": false,
+      "canvas:Crear nuevo lienzo": false,
+      "daily-notes:Abrir la nota de hoy": false,
+      "templates:Insertar plantilla": false,
+      "command-palette:Abrir paleta de comandos": false,
+      "bases:Crear nueva base": false
+    }
+  },
+  "active": "e489d159ae516d62",
+  "lastOpenFiles": [
+    "00_MOC_PaySync.md",
+    "04_DevOps-Despliegue/Variables-Entorno.md",
+    "05_Calidad-Testing/Plan-de-Pruebas.md",
+    "01_Arquitectura/Vision-General.md",
+    "05_Calidad-Testing/Matriz-de-Trazabilidad.md",
+    "05_Calidad-Testing",
+    "04_DevOps-Despliegue/Guia-Docker-Compose.md",
+    "03_Frontend/Guia-Estilos-Tailwind.md",
+    "03_Frontend/Gestion-Estado.md",
+    "03_Frontend/Arbol-Componentes.md",
+    "03_Frontend",
+    "02_Backend/Pipeline-OCR-Vision.md",
+    "02_Backend/WebSockets-Eventos.md",
+    "01_Arquitectura/Diagrama-C4-Sistema.md",
+    "02_Backend/Algoritmo-Liquidacion.md",
+    "04_DevOps-Despliegue/Despliegue-Cloud.md",
+    "04_DevOps-Despliegue"
+  ]
+}

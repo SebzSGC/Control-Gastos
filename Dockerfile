@@ -29,7 +29,8 @@ WORKDIR /app
 # Set default production environment variables
 ENV NODE_ENV=production \
     PORT=3001 \
-    DATABASE_PATH=/app/data/app_data.db
+    DATABASE_PATH=/app/data/app_data.db \
+    UPLOAD_DIR=/app/backend/uploads
 
 # Install backend production dependencies
 COPY backend/package*.json ./backend/

@@ -39,8 +39,9 @@ fi
 # 6. Validar estado de salud del servicio
 echo "🩺 Verificando salud del servicio..."
 sleep 2
+HEALTH_PORT="${PORT:-3001}"
 if command -v curl >/dev/null 2>&1; then
-  curl -fsS http://localhost:3001/api/health || { echo "❌ El Healthcheck falló"; exit 1; }
+  curl -fsS "http://localhost:${HEALTH_PORT}/api/health" || { echo "❌ El Healthcheck falló"; exit 1; }
   echo ""
   echo "🎉 ¡Despliegue completado con éxito! PaySync está activo y saludable."
 else
