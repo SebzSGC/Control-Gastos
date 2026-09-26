@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Plus, User, Smartphone, ArrowRight, X, RotateCw, AlertTriangle } from 'lucide-react';
+import { Plus, User, Smartphone, ArrowRight, ArrowLeft, X, RotateCw, AlertTriangle } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { useToast } from '../context/ToastContext';
 import { API_URL } from '../config/api';
@@ -129,7 +129,7 @@ export default function Profiles() {
   if (loading) {
     return (
       <>
-        <Navbar />
+        <Navbar showBackButton={true} onBack={() => navigate('/')} />
         <div className="flex-center" style={{ minHeight: '75vh', flexDirection: 'column', gap: '1rem', padding: '1.5rem', textAlign: 'center' }}>
           <div className="status-dot" style={{ width: 14, height: 14, borderRadius: '50%', background: 'var(--primary)', animation: 'ripplePulse 1.5s infinite' }} />
           <p className="text-muted" style={{ fontWeight: '600' }}>Cargando sala y participantes...</p>
@@ -146,7 +146,7 @@ export default function Profiles() {
   if (loadError) {
     return (
       <>
-        <Navbar />
+        <Navbar showBackButton={true} onBack={() => navigate('/')} />
         <div className="flex-center" style={{ minHeight: '75vh', padding: '1.5rem' }}>
           <div className="glass-panel animate-toast-in" style={{ maxWidth: '420px', width: '100%', padding: '2rem', textAlign: 'center' }}>
             <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(244, 63, 94, 0.12)', color: 'var(--danger)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
@@ -184,9 +184,17 @@ export default function Profiles() {
 
   return (
     <>
-      <Navbar group={group} />
+      <Navbar group={group} showBackButton={true} onBack={() => navigate('/')} />
 
       <main className="container profiles-main-container" style={{ maxWidth: '960px' }}>
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          className="btn-secondary btn-sm"
+          style={{ marginBottom: '1.25rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+        >
+          <ArrowLeft size={16} /> <span>Volver al Menú Principal</span>
+        </button>
         
         {/* Header */}
         <div className="profiles-header animate-fade-in" style={{ textAlign: 'center', marginBottom: '3rem' }}>
