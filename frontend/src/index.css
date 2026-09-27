@@ -3368,11 +3368,81 @@ button:active:not(:disabled) {
   color: var(--text-subtle);
 }
 
+/* ================= PAYMENT INFO MODAL (DIGITAL CARD / BRE-B) ================= */
+.modal-payment-info {
+  width: 100%;
+  max-width: 440px !important;
+  max-height: min(640px, 88vh) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  margin: auto !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: var(--radius-xl);
+}
+
+.modal-payment-info .sheet-drag-handle {
+  display: none;
+}
+
+.modal-payment-header {
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.modal-payment-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.modal-payment-body {
+  padding: 1.25rem 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.modal-payment-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  flex-shrink: 0;
+}
+
+.payment-footer-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
 /* Adaptación responsive para móviles */
 @media (max-width: 640px) {
-  .modal-profile-key {
+  .modal-profile-key,
+  .modal-payment-info {
     max-width: 100% !important;
-    max-height: 88vh !important;
+    max-height: 90vh !important;
     border-bottom-left-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
     border-top-left-radius: 20px !important;
@@ -3382,7 +3452,8 @@ button:active:not(:disabled) {
     animation: slideUpSheet 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  .modal-profile-key .sheet-drag-handle {
+  .modal-profile-key .sheet-drag-handle,
+  .modal-payment-info .sheet-drag-handle {
     display: block;
     width: 36px;
     height: 4px;
@@ -3391,16 +3462,19 @@ button:active:not(:disabled) {
     margin: 0.55rem auto 0 auto;
   }
 
-  .modal-profile-header {
-    padding: 0.75rem 1.2rem 0.75rem 1.2rem;
+  .modal-profile-header,
+  .modal-payment-header {
+    padding: 0.85rem 1.25rem;
   }
 
-  .modal-profile-body {
-    padding: 1rem 1.2rem;
+  .modal-profile-body,
+  .modal-payment-body {
+    padding: 1rem 1.25rem;
   }
 
-  .modal-profile-footer {
-    padding: 0.8rem 1.2rem calc(0.85rem + env(safe-area-inset-bottom, 0px)) 1.2rem;
+  .modal-profile-footer,
+  .modal-payment-footer {
+    padding: 0.85rem 1.25rem calc(0.85rem + env(safe-area-inset-bottom, 0px)) 1.25rem;
   }
 }
 

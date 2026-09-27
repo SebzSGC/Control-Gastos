@@ -43,13 +43,13 @@ flowchart TD
     Dash --> ModalProf["ProfileKeyModal.jsx (Generador/Carga Bre-B)"]
     Dash --> ModalBillD["BillDetailsModal.jsx"]
     Dash --> ModalDel["DeleteExpenseModal.jsx"]
-    Dash --> ModalPay["PaymentInfoModal.jsx"]
+    Dash --> ModalPay["PaymentInfoModal.jsx\n(Estructura 3 Capas: Header, Body, Footer)"]
     Dash --> ModalVoucher["PaymentVoucherModal.jsx (OCR & Liquidación)"]
     Dash --> ModalSplit["BillSplitterModal.jsx (OCR & Subida)"]
     Dash --> ModalLive["LiveBillClaimModal.jsx (Comanda Viva)"]
     Dash --> ModalNFC["NFCShareModal.jsx"]
 
-    ModalPay --> DigCard["DigitalCard.jsx (Tarjeta & QR Bre-B)"]
+    ModalPay --> DigCard["DigitalCard.jsx\n(Auto-Vectorización al Vuelo 160px & QR Bre-B)"]
     DigCard -.->|Atajo Ya pagué| ModalVoucher
 
     FloatingDock -.->|Dispara en Móvil| ModalAdd
@@ -117,12 +117,77 @@ Todos los componentes modales incorporan soporte responsivo híbrido: se present
 | `BillSplitterModal.jsx` | Subida de ticket, Jimp + OCR y [[02_Backend/Pipeline-OCR-Vision|Pipeline Multimodal]]. | Modal Amplio (90vh) | Bottom Sheet de pantalla completa scrollable |
 | `LiveBillClaimModal.jsx` | Reclamación interactiva de platos en tiempo real vía [[02_Backend/WebSockets-Eventos|WebSockets]]. | Modal Amplio | Bottom Sheet interactivo con selección táctil |
 | `ProfileKeyModal.jsx` | Edición de clave bancaria (Bre-B, Nequi), vectorización con jsQR y carga oficial. Ver [[03_Frontend/Generador-QR-Bre-B#1-configuracion-de-llave-y-carga-de-qr-profilekeymodaljsx|Generador QR Bre-B]]. | Modal Centrado | Bottom Sheet con tirador táctil |
-| `PaymentInfoModal.jsx` | Ficha de cobro del acreedor con copiado de alias y visualización QR mediante `DigitalCard.jsx`. | Modal Centrado | Bottom Sheet con tirador táctil |
+| `PaymentInfoModal.jsx` | Ficha de cobro con arquitectura de 3 capas (`.modal-payment-info`), botones fijos y auto-vectorización al vuelo en `DigitalCard.jsx`. Ver [[03_Frontend/Generador-QR-Bre-B#3-visualizacion-e-interaccion-digitalcardjsx-y-paymentinfomodaljsx|Generador QR Bre-B]]. | Modal Centrado (max 440px x min(640px, 88vh)) | Bottom Sheet con tirador táctil, max 90vh y safe area |
 | `PaymentVoucherModal.jsx` | Carga de comprobante de pago bancario, pre-escaneo OCR y liquidación automática. Ver [[03_Frontend/Generador-QR-Bre-B#4-ergonomia-mobile-first-paymentvouchermodaljsx|PaymentVoucherModal]]. | Modal Centrado | Bottom Sheet con tirador táctil y tarjeta de deuda |
 | `DeleteExpenseModal.jsx` | Diálogo de confirmación para eliminar una transacción registrada. | Modal Compacto | Bottom Sheet de acción rápida |
 | `BillDetailsModal.jsx` | Visualización detallada de items de una factura ya consolidada. | Modal Centrado | Bottom Sheet con scroll inercial |
 | `NFCScannerModal.jsx` | Lectura de tarjetas o terminales mediante Web NFC API. | Modal Centrado | Bottom Sheet con animación de radar |
 | `NFCShareModal.jsx` | Emulación y escritura de enlaces de sala mediante Web NFC API. | Modal Centrado | Bottom Sheet táctil |
+
+---
+
+## Arquitectura de 3 Capas: PaymentInfoModal.jsx y DigitalCard.jsx
+
+El componente `PaymentInfoModal.jsx` (localizado en `src/components/dashboard/PaymentInfoModal.jsx`) actúa como el orquestador modal para la tarjeta virtual y el código QR de cobro (`DigitalCard.jsx`). Resuelve los retos ergonómicos y de usabilidad móvil mediante una arquitectura desacoplada de 3 capas gobernada por la clase `.modal-payment-info`:
+
+```mermaid
+flowchart TD
+    subgraph Container[".modal-payment-info (max-width: 440px | max-height: min(640px, 88vh))"]
+        H["Capa 1: Header Fijo (.modal-payment-header)\n- Titulo: 'Datos para Transferir'\n- Boton X de Cierre (.modal-close-btn)\n- flex-shrink: 0 | border-bottom"]
+        B["Capa 2: Body Scrolleable (.modal-payment-body)\n- Tabs: Tarjeta Virtual / Codigo QR Bre-B\n- Placa QR blanca con QRCodeSVG (160px)\n- Botones secundarios: Ampliar Lightbox / Descargar\n- overflow-y: auto | flex: 1 | min-height: 0"]
+        F["Capa 3: Footer Fijo (.modal-payment-footer)\n- Boton Primario: 'Ya pague: Subir Comprobante'\n- Boton Secundario: 'Copiar Llave (clave)'\n- flex-shrink: 0 | border-top | safe-area-inset-bottom"]
+    end
+    H --> B
+    B --> F
+```
+
+### 1. Estructura de 3 Capas y Clase `.modal-payment-info`
+
+- **Capa 1 - Header Fijo (`.modal-payment-header`):**
+  - Mantiene el título contextual (`modal-payment-title`) y el botón accesible de cierre (`modal-close-btn`) anclados rígidamente en la parte superior.
+  - Inmune al scroll del contenido gracias a `flex-shrink: 0` y delimitado por `border-bottom: 1px solid var(--border-subtle)`.
+- **Capa 2 - Body Scrolleable (`.modal-payment-body`):**
+  - Configurado con `flex: 1`, `min-height: 0` y `overflow-y: auto`.
+  - Aloja el selector de pestañas (`.digital-card-tabs`), la superficie biomórfica de la tarjeta (`.digital-card-surface`), la placa blanca de alto contraste para el QR (`.qr-code-plate`), los detalles del titular y la botonera utilitaria secundaria (`.qr-tools-row`).
+  - Aísla completamente el desplazamiento vertical, impidiendo que el crecimiento del contenido empuje la cabecera o el pie hacia afuera.
+- **Capa 3 - Footer Fijo (`.modal-payment-footer`):**
+  - Desacoplado rígidamente del scroll (`flex-shrink: 0`, `background: var(--bg-surface)`, `border-top: 1px solid var(--border-subtle)`).
+  - Alberga las acciones de máxima jerarquía: `'Ya pague: Subir Comprobante'` y `'Copiar Llave'`.
+- **Adaptación Responsiva Móvil (`@media (max-width: 640px)`):**
+  - Transforma el modal centrado en una hoja inferior (*Bottom Sheet*) con `max-height: 90vh !important`.
+  - Bordes superiores redondeados (`border-top-left-radius: 20px; border-top-right-radius: 20px;`).
+  - Tirador táctil superior `.sheet-drag-handle` (36px x 4px) visible para arrastre gestual.
+  - Margen de seguridad inferior adaptativo: `padding: 0.85rem 1.25rem calc(0.85rem + env(safe-area-inset-bottom, 0px)) 1.25rem;`.
+
+### 2. Auto-Vectorización al Vuelo en DigitalCard.jsx
+
+Cuando un usuario consulta los datos de pago de un compañero que únicamente subió una imagen rasterizada de su código QR bancario (almacenada como ruta física en `/uploads/qr/...`), `DigitalCard.jsx` ejecuta un proceso de decodificación y re-vectorización en tiempo real:
+
+1. **Detección Condicional y Hook `useEffect`:**
+   - Si `profile.payment_qr` existe pero `isVectorQrPayload(profile.payment_qr)` es falso (es decir, es una URL de imagen rasterizada), se activa el hook reactivo.
+2. **Decodificación Asíncrona en Memoria:**
+   - Resuelve la URL absoluta mediante `getUploadUrl(profile.payment_qr)`.
+   - Ejecuta `decodeQrFromImage(qrUrl)` (módulo [[03_Frontend/Generador-QR-Bre-B#2-motor-de-vectorizacion-automatica-y-decodificacion-qrdecoderjs|qrDecoder.js]]), dibujando la imagen en un lienzo `HTMLCanvasElement` temporal y analizando los módulos binarios con `jsQR`.
+3. **Manejo Seguro del Ciclo de Vida:**
+   - Utiliza una bandera de montaje (`isMounted = true` con función de limpieza a `false`) para evitar advertencias de fuga de memoria o asignaciones de estado sobre componentes desmontados.
+4. **Conmutación a Vector SVG Puro (`QRCodeSVG`):**
+   - Al resolverse exitosamente la decodificación, el estado almacena la trama en `liveVectorPayload`.
+   - Se calcula determinísticamente `const effectiveVectorPayload = initialIsVector ? profile.payment_qr : liveVectorPayload;`.
+   - Si `isVector` es verdadero, la interfaz conmuta instantáneamente de la etiqueta `<img>` al componente vectorial `<QRCodeSVG value={effectiveVectorPayload} size={160} level="M" />`.
+5. **Fallback Rasterizado Acotado:**
+   - Si la imagen original no puede decodificarse por baja resolución o ruido, la imagen rasterizada se proyecta acotada a `maxHeight: 180px`, preservando la estabilidad visual de la interfaz.
+
+### 3. Garantía de Visibilidad Permanente para Botones de Acción
+
+El diseño garantiza que los botones primarios no dependan del desplazamiento vertical del usuario:
+
+- **Botón 'Ya pagué: Subir Comprobante':**
+  - Despacha `handleGoToVoucher()`, ejecutando `onOpenVoucherModal(profile)` para abrir directamente `PaymentVoucherModal.jsx` con el contexto del destinatario.
+  - Permanece permanentemente visible al pie del modal sin importar la altura de la tarjeta o el tamaño de la pantalla.
+- **Botón 'Copiar Llave':**
+  - Permite copiar la llave Bre-B/Nequi al portapapeles con un solo toque y despliega retroalimentación Toast inmediata.
+- **Ventaja Ergonómica en Dispositivos Móviles:**
+  - Al estar anclados en `.modal-payment-footer`, ambos botones se localizan siempre dentro de la zona de pulgar (*Thumb Zone*), erradicando el esfuerzo de realizar scroll para confirmar o copiar tras revisar el QR.
 
 ---
 

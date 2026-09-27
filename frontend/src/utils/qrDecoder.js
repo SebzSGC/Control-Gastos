@@ -8,13 +8,28 @@ import jsQR from 'jsqr';
  * @param {File|Blob} file - Archivo de imagen seleccionado
  * @returns {Promise<{ success: boolean, payload?: string, error?: string }>}
  */
-export async function decodeQrFromImage(file) {
-  return new Promise((resolve) => {
-    if (!file) {
-      resolve({ success: false, error: 'No se proporcionó ningún archivo de imagen' });
-      return;
-    }
+export async function decodeQrFromImage(fileOrUrl) {
+  if (!fileOrUrl) {
+    return { success: false, error: 'No se proporcionó ningún archivo de imagen' };
+  }
 
+  let file = fileOrUrl;
+
+  // Si se proporciona una URL o ruta en string, la obtenemos como Blob
+  if (typeof fileOrUrl === 'string') {
+    try {
+      const res = await fetch(fileOrUrl);
+      if (!res.ok) {
+        return { success: false, error: 'Error al obtener la imagen del servidor' };
+      }
+      file = await res.blob();
+    } catch (fetchErr) {
+      console.warn('Error al descargar imagen para decodificación:', fetchErr);
+      return { success: false, error: 'No se pudo cargar la imagen para análisis' };
+    }
+  }
+
+  return new Promise((resolve) => {
     const reader = new FileReader();
 
     reader.onerror = () => {

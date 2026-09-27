@@ -218,13 +218,13 @@ export function isVectorQrPayload(value) {
 
 ### 2.4 Transicion de Imagen Rasterizada a Renderizado Vectorial Puro (`QRCodeSVG`)
 
-En lugar de proyectar fotografias o capturas de afiches propensas a imperfecciones, el frontend conmuta de forma transparente al motor vectorial:
+En lugar de proyectar fotografias o capturas de afiches propensas a imperfecciones, el frontend conmuta de forma transparente al motor vectorial. Cuando el perfil ya cuenta con un payload EMVCo persistido (`000201...`) o cuando el motor de auto-vectorizacion al vuelo en `DigitalCard.jsx` decodifica la imagen rasterizada en memoria, se utiliza la variable `effectiveVectorPayload` para proyectar el vector matematico SVG puro con dimension calibrada de 160 px:
 
 ```jsx
 {isVector ? (
   <QRCodeSVG
-    value={profile.payment_qr}
-    size={180}
+    value={effectiveVectorPayload}
+    size={160}
     level="M"
     style={{ display: 'block', maxWidth: '100%' }}
   />
@@ -234,11 +234,11 @@ En lugar de proyectar fotografias o capturas de afiches propensas a imperfeccion
     alt={`Codigo QR Oficial de ${profile.name}`}
     style={{
       maxWidth: '100%',
-      maxHeight: '320px',
+      maxHeight: '180px',
       width: 'auto',
       height: 'auto',
       objectFit: 'contain',
-      borderRadius: '10px',
+      borderRadius: '8px',
       display: 'block',
     }}
   />
@@ -250,7 +250,7 @@ Cuando `isVector` es verdadero, la interfaz exhibe un distintivo esmeralda con e
 ```
 [ ShieldCheck ] Codigo QR Bre-B Oficial (Vectorial)
 ```
-Si el perfil cuenta unicamente con la imagen rasterizada sin decodificar, el rotulo indica:
+Si el perfil cuenta unicamente con la imagen rasterizada sin decodificar (o mientras el hook asincrono procesa la imagen), el rotulo indica:
 ```
 [ ShieldCheck ] Codigo QR Bre-B Oficial
 ```
@@ -298,72 +298,227 @@ flowchart LR
 
 ## 3. Visualizacion e Interaccion: DigitalCard.jsx y PaymentInfoModal.jsx
 
-El componente `DigitalCard.jsx` actua como la interfaz interactiva central cuando un participante necesita transferir dinero a otro miembro del grupo. Se presenta encapsulado dentro del dialogo `PaymentInfoModal.jsx`.
+El componente `DigitalCard.jsx` actua como la interfaz interactiva central cuando un participante necesita transferir dinero a otro miembro del grupo. Se presenta orquestado y encapsulado dentro del dialogo `PaymentInfoModal.jsx` (localizado en `frontend/src/components/dashboard/PaymentInfoModal.jsx`).
 
 ```mermaid
 flowchart TD
-    ClickPay["Usuario pulsa Pagar en SettlementCard"] --> OpenModal["PaymentInfoModal.jsx"]
-    OpenModal --> DigitalCardComp["DigitalCard.jsx"]
+    ClickPay["Usuario pulsa Pagar en SettlementCard"] --> OpenModal["PaymentInfoModal.jsx\n(.modal-payment-info)"]
     
-    DigitalCardComp --> EvalSource{"¿Tiene codigo QR registrado?"}
-    EvalSource -- Si --> DefaultQR["Apertura directa en Modo QR"]
-    EvalSource -- No --> DefaultCard["Apertura en Modo Tarjeta Digital"]
+    subgraph ModalArch["Arquitectura de 3 Capas (.modal-payment-info)"]
+        HeaderLayer["Capa 1: Header Fijo (.modal-payment-header)\nTitulo: 'Datos para Transferir' + Boton X Cerrar"]
+        BodyLayer["Capa 2: Body Scrolleable (.modal-payment-body)\nTabs Tarjeta/QR, Placa 160px, Consejos\noverflow-y: auto | flex: 1"]
+        FooterLayer["Capa 3: Footer Fijo (.modal-payment-footer)\nflex-shrink: 0 | border-top\nBotones Desacoplados del Scroll"]
+    end
     
-    DigitalCardComp --> TabCard["Modo Tarjeta Digital"]
-    DigitalCardComp --> TabQR["Modo Codigo QR Bre-B"]
+    OpenModal --> HeaderLayer
+    OpenModal --> BodyLayer
+    OpenModal --> FooterLayer
     
-    TabCard --> CopyKey["Copiar Llave al Portapapeles (1 clic)"]
-    TabCard --> CardVisual["Tarjeta con Chip y Marca Bancaria"]
+    BodyLayer --> DigitalCardComp["DigitalCard.jsx"]
     
-    TabQR --> HighContrast["Placa Blanca de Alto Contraste"]
-    HighContrast --> RenderMethod{"isVectorQrPayload(payment_qr)"}
-    RenderMethod -- Verdadero --> SvgRender["QRCodeSVG (180px, Nivel M)"]
-    RenderMethod -- Falso --> ImgTag["img (objectFit: contain, max 320px)"]
+    subgraph AutoVecEngine["Mecanismo de Auto-Vectorizacion al Vuelo"]
+        EvalQr{"¿Tiene payment_qr?"}
+        EvalQr -- No --> TabCardDefault["Pestaña Tarjeta por defecto"]
+        EvalQr -- Si --> CheckVector{"¿isVectorQrPayload(payment_qr)?"}
+        CheckVector -- Si --> SvgDirect["QRCodeSVG (160px) inmediato"]
+        CheckVector -- No --> HookAsync["useEffect: decodeQrFromImage(getUploadUrl)"]
+        HookAsync --> DecodeResult{"¿Decodificacion exitosa?"}
+        DecodeResult -- Si --> SetLiveState["setLiveVectorPayload(res.payload)\nConmuta a QRCodeSVG (160px)"]
+        DecodeResult -- No --> RasterFallback["Fallback: img rasterizada (max 180px)"]
+    end
     
-    TabQR --> ToolsRow["Barra de Herramientas"]
-    ToolsRow --> ToolLightbox["Ampliar QR (Modo Lightbox Mesa)"]
-    ToolsRow --> ToolDownload["Descargar PNG en Alta Definicion"]
+    DigitalCardComp --> AutoVecEngine
     
-    ToolLightbox --> LightboxOverlay["Overlay a Pantalla Completa\n(fixed inset-0, bg rgba 0.92, blur 8px)\nPlaca blanca reforzada"]
-    ToolDownload --> DownloadEngine{"Tipo de QR"}
-    DownloadEngine -- Vectorial --> XMLCanvas["Serializar SVG a XML\nRender en canvas 600x600 HD\nDescarga PNG nítido"]
-    DownloadEngine -- Raster --> DirectFile["Descarga directa desde /uploads/qr/"]
+    FooterLayer --> ActionPay["Boton Primario: Ya pague: Subir Comprobante\nReceipt icon | onOpenVoucherModal(profile)"]
+    FooterLayer --> ActionCopy["Boton Secundario: Copiar Llave\nCopy/Check icon | navigator.clipboard"]
     
-    DigitalCardComp --> VoucherAction["Boton: Ya pague: Subir Comprobante"]
-    VoucherAction --> OpenVoucher["Abre PaymentVoucherModal.jsx"]
+    ActionPay --> OpenVoucher["Abre PaymentVoucherModal.jsx"]
 ```
 
-### 3.1 Modo Tarjeta Digital (`activeTab === 'card'`)
+---
+
+### 3.1 Arquitectura de 3 Capas de PaymentInfoModal.jsx (`.modal-payment-info`)
+
+Para erradicar problemas de usabilidad donde el contenido extenso o imagenes de codigos QR empujaban los botones de accion fuera de la ventana visible del dispositivo movil, `PaymentInfoModal.jsx` y su contenedor `.modal-payment-info` implementan una arquitectura modular desacoplada en tres estratos funcionales:
+
+#### Capa 1: Header Fijo Superior (`.modal-payment-header`)
+- **Funcion:** Establece el contexto inmediato de la accion de cobro y provee una salida accesible.
+- **Componentes:**
+  - Titulo jerarquico: `<h3 className="modal-payment-title">Datos para Transferir</h3>`.
+  - Boton accesible de cierre: `<button className="modal-close-btn"><X size={20} /></button>` con microinteraccion `active:scale-[0.98]`.
+- **Propiedades CSS Clave:** `flex-shrink: 0; padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between;`.
+
+#### Capa 2: Body Scrolleable Central (`.modal-payment-body`)
+- **Funcion:** Aloja todo el contenido visual e interactivo de la tarjeta y el codigo QR, aislando su desplazamiento del resto del modal.
+- **Componentes Encapsulados:**
+  - Selector de pestañas (`.digital-card-tabs` con opciones 'Tarjeta Digital' y 'Codigo QR Bre-B').
+  - Superficie grafica de la tarjeta virtual (`.digital-card-surface`) o contenedor del QR (`.qr-card-surface`).
+  - Placa blanca de alto contraste con `QRCodeSVG` o `img` rasterizada.
+  - Informacion del titular y numero de llave con selector de copiado rapido.
+  - Barra de herramientas secundarias (`.qr-tools-row`) con botones de 'Ampliar QR para Escanear' y 'Descargar'.
+  - Mensaje guia contextual sobre compatibilidad con apps bancarias (Bancolombia, Nequi, Daviplata, Bre-B).
+- **Propiedades CSS Clave:** `overflow-y: auto; flex: 1; min-height: 0; padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 0.85rem;`. El parametro `min-height: 0` es esencial dentro de contenedores Flexbox para obligar al hijo a respetar el limite de altura y activar el scroll vertical interno.
+
+#### Capa 3: Footer Fijo Inferior (`.modal-payment-footer`)
+- **Funcion:** Ancla permanentemente las llamadas a la accion principales (*Call To Action*) en la base del modal, garantizando disponibilidad inmediata e invarianza frente al scroll.
+- **Componentes:**
+  - Boton primario de salto a liquidacion: `'Ya pague: Subir Comprobante'`.
+  - Boton secundario opcional de copiado: `'Copiar Llave ({profile.payment_key})'`.
+- **Propiedades CSS Clave:** `flex-shrink: 0; padding: 1rem 1.5rem; border-top: 1px solid var(--border-subtle); background: var(--bg-surface); display: flex; flex-direction: column; gap: 0.55rem;`.
+
+#### Especificaciones Estructurales de `.modal-payment-info`:
+```css
+.modal-payment-info {
+  width: 100%;
+  max-width: 440px !important;
+  max-height: min(640px, 88vh) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  margin: auto !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: var(--radius-xl);
+}
+```
+
+#### Adaptacion Ergonomica Mobile (< 640px):
+En pantallas moviles, `.modal-payment-info` transmuta a una hoja deslizante (*Bottom Sheet*):
+- Anclaje inferior: Se ubica en el borde inferior con bordes superiores curvados (`border-top-left-radius: 20px; border-top-right-radius: 20px; border-bottom-left-radius: 0; border-bottom-right-radius: 0;`).
+- Animacion de entrada: Desplazamiento elastico vertical (`animation: slideUpSheet 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;`).
+- Tirador tactil: Incorpora `.sheet-drag-handle` (`width: 36px; height: 4px; border-radius: var(--radius-full); margin: 0.55rem auto 0 auto;`).
+- Altura maxima contenida: `max-height: 90vh !important`.
+- Ergonomia para barras gestuales: El padding inferior del footer integra la variable de entorno del navegador para dispositivos moviles: `padding: 0.85rem 1.25rem calc(0.85rem + env(safe-area-inset-bottom, 0px)) 1.25rem;`.
+
+---
+
+### 3.2 Garantia de Visibilidad Permanente para Botones de Accion
+
+En flujos transaccionales presenciales (por ejemplo, saldar cuentas de una cena en grupo), el usuario necesita copiar la llave o confirmar el pago de manera agil inmediatamente despues de escanear el codigo o visualizar los datos bancarios.
+
+La arquitectura de tres capas garantiza formalmente la visibilidad ininterrumpida de estas acciones:
+
+1. **Boton Primario 'Ya pague: Subir Comprobante':**
+   - Estilo: `.btn-primary.payment-footer-btn` con microinteraccion `active:scale-[0.98]` e icono `Receipt`.
+   - Funcionamiento: Ejecuta `handleGoToVoucher()`, el cual invoca el prop `onOpenVoucherModal(profile)` y cierra el dialogo de informacion de pago.
+   - Resultado: Transiciona al usuario sin friccion al componente `PaymentVoucherModal.jsx` con el contexto del destinatario precargado.
+
+2. **Boton Secundario 'Copiar Llave ({profile.payment_key})':**
+   - Estilo: `.btn-secondary.payment-footer-btn` con icono reactivo `Copy` (o `Check` en verde menta tras el copiado).
+   - Condicionalidad: Se renderiza unicamente si el participante dispone de una llave registrada (`profile.payment_key`).
+   - Eficacia: Permite el copiado directo al portapapeles (`navigator.clipboard.writeText`) con confirmacion Toast automatica sin obligar al usuario a manipular el texto dentro de la tarjeta.
+
+3. **Independencia del Desplazamiento (Scroll Decoupling):**
+   - Dado que los botones habitan exclusivamente dentro de `.modal-payment-footer` (elemento hermano de `.modal-payment-body`), cualquier desplazamiento inercial sobre el codigo QR, herramientas secundarias o notas explicativas no afecta en lo mas minimo la coordenada espacial de los botones.
+   - En dispositivos de pantalla reducida (como pantallas de 4.7 a 6.1 pulgadas), los botones permanecen siempre dentro de la zona de confort del pulgar (*Thumb Zone*), erradicando la necesidad de desplazarse hasta el fondo de la vista.
+
+---
+
+### 3.3 Mecanismo de Auto-Vectorizacion al Vuelo en DigitalCard.jsx
+
+Uno de los principales desafios tecnicos radicaba en perfiles de usuarios que habian subido previamente fotos o capturas de pantalla de sus codigos QR (almacenadas como rutas de servidor rasterizadas `/uploads/qr/...`), sin contar con un payload vectorial EMVCo almacenado en la base de datos SQLite.
+
+Para resolver esto sin requerir migraciones complejas de backend o solicitar al usuario que vuelva a subir su archivo, `DigitalCard.jsx` incorpora un motor reactivo de **auto-vectorizacion al vuelo** mediante `useEffect` y el modulo `qrDecoder.js`:
+
+```javascript
+// Hook de decodificacion en cliente al vuelo:
+useEffect(() => {
+  if (!profile?.payment_qr || isVectorQrPayload(profile.payment_qr)) {
+    return;
+  }
+
+  let isMounted = true;
+  const qrUrl = getUploadUrl(profile.payment_qr);
+  decodeQrFromImage(qrUrl)
+    .then((res) => {
+      if (isMounted && res.success && res.payload) {
+        setLiveVectorPayload(res.payload);
+      }
+    })
+    .catch((err) => {
+      console.warn('Error al decodificar QR en vivo:', err);
+    });
+
+  return () => {
+    isMounted = false;
+  };
+}, [profile?.payment_qr]);
+```
+
+#### Pipeline de Auto-Vectorizacion en Tiempo de Ejecucion:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Usuario
+    participant Modal as PaymentInfoModal
+    participant Card as DigitalCard
+    participant Decoder as qrDecoder.js (Canvas en memoria)
+    participant DOM as Renderizado (QRCodeSVG)
+
+    Usuario->>Modal: Clic en 'Pagar' (Abre modal)
+    Modal->>Card: Renderiza con profile.payment_qr (URL de imagen)
+    Card->>Card: Evalua isVectorQrPayload(payment_qr) -> false
+    Card->>Card: Render inicial: Muestra imagen rasterizada acotada (maxHeight: 180px)
+    Card->>Decoder: useEffect dispara decodeQrFromImage(qrUrl)
+    Note over Decoder: Dibuja imagen en HTMLCanvasElement<br/>Ejecuta jsQR con inversion dual
+    Decoder-->>Card: Retorna { success: true, payload: "000201..." }
+    Card->>Card: Actualiza estado liveVectorPayload
+    Card->>DOM: Recalcula effectiveVectorPayload -> Conmuta a QRCodeSVG (160px)
+    DOM-->>Usuario: Codigo QR transformado a vector SVG matematico nitido
+```
+
+#### Aspectos Tecnicos Destacados del Mecanismo:
+1. **Deteccion Selectiva:** Si `profile.payment_qr` ya es una cadena vectorial (ej. inicia con `000201`), el hook aborta tempranamente sin consumir ciclos de CPU.
+2. **Prevencion de Memory Leaks:** Emplea el patron de bandera `isMounted`. Si el usuario abre el modal y lo cierra rapidamente antes de que `decodeQrFromImage` finalice, la promesa descartara el resultado sin invocar `setLiveVectorPayload` sobre un componente desmontado.
+3. **Determinacion Determinista del Payload (`effectiveVectorPayload`):**
+   ```javascript
+   const effectiveVectorPayload = initialIsVector ? profile.payment_qr : liveVectorPayload;
+   const isVector = Boolean(effectiveVectorPayload);
+   ```
+4. **Dimension Calibrada de 160 px (`size={160}`):**
+   - El componente `<QRCodeSVG>` se renderiza con `size={160}` y nivel de correccion `level="M"`.
+   - Esta dimension garantiza que la placa contenedora encaje perfectamente en la altura util del modal tanto en escritorio como en moviles compactos, previniendo scrolls innecesarios.
+5. **Fallback Rasterizado Acotado (`maxHeight: 180px`):**
+   - Si la imagen contiene un QR ilegible o degradado donde `jsQR` falla, la imagen original no bloquea la interfaz. Se proyecta confinada con `maxHeight: '180px'`, `objectFit: 'contain'` y esquinas redondeadas de 8 px.
+6. **Incentivo de Confianza Visual:** Al concretarse la vectorizacion al vuelo, el rotulo pasa de forma automatica y en vivo de `"Codigo QR Bre-B Oficial"` a `"Codigo QR Bre-B Oficial (Vectorial)"`.
+
+---
+
+### 3.4 Modos de Presentacion: Tarjeta Digital vs. Codigo QR Bre-B
+
+El selector superior de pastillas (`.digital-card-tabs`) permite alternar entre dos representaciones complementarias:
+
+#### Modo Tarjeta Digital (`activeTab === 'card'`)
 - Estetica biomorfica de tarjeta financiera con degradado oscuro, patron decorativo geometrico, indicador de tecnologia sin contacto (*contactless waves*) y representacion grafica de microchip de seguridad.
 - Llave de pago en tipografia monoespaciada tabular (`num-tabular`) con boton integrado para copiar al portapapeles (`navigator.clipboard.writeText`) y retroalimentacion mediante notificacion Toast.
 - Distintivo dinamico de entidad (por ejemplo, identificando numeros celulares de 10 digitos que inicien por 3 como cuenta Nequi / Bre-B).
 
-### 3.2 Modo Codigo QR Bre-B (`activeTab === 'qr'`)
+#### Modo Codigo QR Bre-B (`activeTab === 'qr'`)
 - **Deteccion y Apertura Inteligente:** Si el participante acreedor registro previamente un codigo QR (vectorial o imagen), el componente conmuta por defecto directamente a la pestaña `qr`, acelerando el escaneo sin pasos intermedios.
-- **Placa de Alto Contraste:** El codigo QR se posiciona sobre un contenedor rigido blanco puro (`#ffffff`) con esquinas redondeadas (`borderRadius: 18px`) y sombra difusa (`0 8px 30px rgba(0, 0, 0, 0.12)`). Esta configuracion erradica los problemas de balance de blancos y enfoque comunmente presentes al escanear codigos sobre fondos oscuros o pantallas OLED.
-- **Renderizado Vectorial `QRCodeSVG`:** Proyecta la matriz a 180 px con correccion de error nivel `M` para una nitidez vectorial perfecta e independiente de la densidad de pixeles del monitor.
+- **Placa de Alto Contraste:** El codigo QR se posiciona sobre un contenedor rigido blanco puro (`#ffffff`) con esquinas redondeadas (`borderRadius: 16px`) y sombra difusa (`0 8px 30px rgba(0, 0, 0, 0.12)`). Esta configuracion erradica los problemas de balance de blancos y enfoque comunmente presentes al escanear codigos sobre fondos oscuros o pantallas OLED.
+- **Renderizado Vectorial `QRCodeSVG`:** Proyecta la matriz a 160 px con correccion de error nivel `M` para una nitidez vectorial perfecta e independiente de la densidad de pixeles del monitor.
 
-### 3.3 Descarga de QR en Alta Definicion (Serializacion SVG a PNG)
+---
+
+### 3.5 Herramientas Secundarias: Descarga HD y Lightbox
+
+Dentro de la pestaña de QR, el contenedor ofrece dos utilidades secundarias en `.qr-tools-row`:
+
+#### Descarga de QR en Alta Definicion (Serializacion SVG a PNG)
 Para la descarga local del codigo (`handleDownloadQr`), el sistema evita round-trips al servidor cuando el QR es vectorial:
-1. Localiza el nodo SVG renderizado en el DOM (`.qr-code-plate svg`).
+1. Localiza el nodo SVG renderizado en el DOM (`.qr-code-plate svg` o `.qr-vector-box svg`).
 2. Lo serializa a cadena XML mediante `new XMLSerializer().serializeToString(svgElement)`.
 3. Crea un Blob con tipo MIME `image/svg+xml;charset=utf-8` y un objeto `Image`.
 4. En el evento `onload` de la imagen, dibuja sobre un lienzo `canvas` de 600x600 pixeles con fondo blanco solido (`#ffffff`) y margen perimetral de 30 px.
 5. Exporta el mapa de bits resultante a formato PNG (`canvas.toDataURL('image/png')`) y dispara la descarga con el nombre `QR_Oficial_[Nombre].png`.
-Si el QR registrado es una imagen tradicional en disco, el boton enlaza directamente a la URL servida desde el backend con atributo `download`.
+Si el QR registrado es una imagen tradicional en disco sin vectorizar, el boton enlaza directamente a la URL servida desde el backend con atributo `download`.
 
-### 3.4 Modo Lightbox para Escaneo de Alto Contraste (`isZoomed`)
+#### Modo Lightbox para Escaneo de Alto Contraste (`isZoomed`)
 - Al pulsar el boton `Ampliar QR para Escanear`, se activa un portal superpuesto a pantalla completa (`position: fixed; inset: 0; background: rgba(0, 0, 0, 0.92); backdrop-filter: blur(8px); z-index: 9999`).
-- Despliega una tarjeta central reforzada con una placa blanca de 240 px, maximizando el contraste fotonico.
+- Despliega una tarjeta central reforzada con una placa blanca y `QRCodeSVG` ampliado a 260 px, maximizando el contraste fotonico.
+- Si se trata de una imagen rasterizada, habilita un conmutador de pastilla (`qr-lightbox-pill-toggle`) entre 'Vista Completa' y 'Enfocar Codigo QR' (con zoom optico 1.42x y transform-origin calibrado).
 - **Caso de Uso de Mesa:** Permite que los companeros sentados a distancia en una mesa de restaurante o bar apunten la camara de su aplicacion bancaria directamente a la pantalla del dispositivo emisor sin necesidad de pasarse el telefono de mano en mano.
 - Cierre intuitivo mediante boton `X`, tecla de escape o toque sobre el fondo oscurecido.
-
-### 3.5 Acceso Rapido hacia Liquidacion
-En la base de la tarjeta digital se ubica el boton destacado:
-```
-[ Ya pague: Subir Comprobante ]
-```
-Este acceso directo transfiere el contexto del perfil receptor (`profile`), emite el callback `onOpenVoucherModal(profile)` y cierra la tarjeta para desplegar sin friccion el modal de comprobantes.
 
 ---
 
@@ -587,6 +742,7 @@ classDiagram
         +profile: Profile
         +onClose()
         +onOpenVoucherModal(profile)
+        <<modal-payment-info 3 capas>>
     }
 
     class DigitalCard {
@@ -594,6 +750,9 @@ classDiagram
         +activeTab: "card" | "qr"
         +isZoomed: boolean
         +isVector: boolean
+        +focusQr: boolean
+        +liveVectorPayload: string | null
+        +effectiveVectorPayload: string
         +handleCopyKey()
         +handleDownloadQr()
         +handleGoToVoucher()
@@ -644,7 +803,7 @@ classDiagram
     
     ProfileKeyModal ..> qrDecoder : decodifica imagen y extrae llave
     ProfileKeyModal ..> emvcoQr : genera payload sintetico
-    DigitalCard ..> qrDecoder : discrimina tipo vectorial
+    DigitalCard ..> qrDecoder : auto-vectorizacion al vuelo (useEffect) y discriminacion vectorial
 ```
 
 ---
