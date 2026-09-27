@@ -7,7 +7,7 @@
 services:
   # Opción A: Servicio Web Fullstack Unificado (Recomendado para PaySync)
   - type: web
-    name: paysync-app
+    name: paycolsync
     runtime: node
     plan: starter
     region: oregon

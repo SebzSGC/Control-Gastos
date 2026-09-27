@@ -74,8 +74,8 @@ Ideal si deseas alojar la SPA de React en la red global de Vercel y el backend e
 3. **Build Command:** `npm run build`.
 4. **Output Directory:** `dist`.
 5. **Variables de Entorno en Vercel:**
-   - `VITE_API_URL`: `https://tu-backend-paysync.onrender.com/api`
-   - `VITE_SOCKET_URL`: `https://tu-backend-paysync.onrender.com`
+   - `VITE_API_URL`: `https://paycolsync.onrender.com/api`
+   - `VITE_SOCKET_URL`: `https://paycolsync.onrender.com`
 6. Asegúrate de configurar la variable `CORS_ORIGIN` en el backend apuntando a tu dominio de Vercel (`https://tu-app.vercel.app`).
 
 ---

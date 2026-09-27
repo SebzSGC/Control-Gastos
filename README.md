@@ -220,7 +220,7 @@ Abre en tu navegador `http://localhost:3001` (o `http://localhost:80` en versió
 2. Selecciona como **Root Directory:** `frontend`.
 3. Framework Preset: **Vite**.
 4. Agrega la variable de entorno:
-   - `VITE_API_URL`: URL pública de tu backend desplegado (ej. `https://control-gastos-api.onrender.com`).
+   - `VITE_API_URL`: URL pública de tu backend desplegado (ej. `https://paycolsync.onrender.com`).
    - `VITE_SOCKET_URL`: Misma URL del backend.
 
 ### Despliegue Backend en Render
