@@ -40,11 +40,11 @@ function ProfileKeyDialog({
     if (!file) return;
     const allowed = ['image/jpeg', 'image/png', 'image/webp'];
     if (!allowed.includes(file.type)) {
-      toast.warning('Formato no compatible. Usa JPEG, PNG o WebP.');
+      toast.warning('Formato no compatible. Sube una foto en formato JPG o PNG.');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast.warning('La imagen supera el límite máximo de 5MB.');
+      toast.warning('La foto supera el límite de 5MB.');
       return;
     }
     setQrFile(file);
@@ -62,19 +62,19 @@ function ProfileKeyDialog({
       const res = await decodeQrFromImage(file);
       if (res.success && res.payload) {
         setVectorQrPayload(res.payload);
-        toast.success('Código QR detectado y vectorizado en alta definición');
+        toast.success('Código QR detectado correctamente');
 
         // If payment key is empty, attempt to extract and auto-fill
         if (!paymentKey.trim()) {
           const extractedKey = extractKeyFromPayload(res.payload);
           if (extractedKey) {
             setPaymentKey(extractedKey);
-            toast.info(`Llave detectada automáticamente: ${extractedKey}`);
+            toast.info(`Número detectado: ${extractedKey}`);
           }
         }
       } else {
         setVectorQrPayload(null);
-        toast.info('Imagen cargada como respaldo directo');
+        toast.info('Foto cargada correctamente');
       }
     } catch (err) {
       console.error('Error al decodificar QR:', err);
@@ -182,10 +182,10 @@ function ProfileKeyDialog({
         <div className="modal-profile-header">
           <div>
             <h3 className="modal-profile-title">
-              Mi Perfil y Llave Bre-B
+              Mi Llave de Pago
             </h3>
             <p className="modal-profile-subtitle">
-              Configura tu identificación y código QR para recibir pagos.
+              Tu nombre y forma de pago para que te transfieran fácilmente.
             </p>
           </div>
           <button
@@ -202,7 +202,7 @@ function ProfileKeyDialog({
         <form onSubmit={handleSubmit} className="modal-profile-form">
           {/* Modal Body */}
           <div className="modal-profile-body">
-            {/* Grid 2 columnas: Tu Nombre y Llave Bre-B */}
+            {/* Grid 2 columnas: Tu Nombre y Celular o Cédula */}
             <div className="profile-key-grid">
               <div className="profile-key-field">
                 <label className="input-label" htmlFor="profile-name-input">
@@ -221,7 +221,7 @@ function ProfileKeyDialog({
 
               <div className="profile-key-field">
                 <label className="input-label" htmlFor="payment-key-input">
-                  Llave Bre-B (Celular o Cédula)
+                  Número de Celular o Cédula
                 </label>
                 <input
                   id="payment-key-input"
@@ -231,17 +231,20 @@ function ProfileKeyDialog({
                   onChange={(e) => setPaymentKey(e.target.value)}
                   placeholder="Ej. 3001234567"
                 />
+                <span className="text-subtle" style={{ fontSize: '0.78rem', marginTop: '0.3rem', display: 'block' }}>
+                  Opcional. Quien te vaya a pagar podrá copiar este número.
+                </span>
               </div>
             </div>
 
-            {/* Sección Código QR Bre-B Oficial */}
+            {/* Sección Foto de tu Código QR */}
             <div className="profile-qr-section">
               <div className="profile-qr-header">
                 <label className="input-label" style={{ margin: 0 }}>
-                  Código QR Bre-B Oficial
+                  Foto de tu Código QR
                 </label>
                 <p className="profile-qr-desc">
-                  Sube la captura oficial de tu app bancaria para recibir transferencias sin errores.
+                  Sube una captura de tu código QR de Bancolombia, Nequi o Daviplata.
                 </p>
               </div>
 
@@ -260,7 +263,7 @@ function ProfileKeyDialog({
                     {isDecoding ? (
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem', color: 'var(--brand-primary)' }}>
                         <Loader2 size={24} className="animate-spin" />
-                        <span style={{ fontSize: '0.68rem', fontWeight: '600' }}>Vectorizando...</span>
+                        <span style={{ fontSize: '0.68rem', fontWeight: '600' }}>Leyendo código...</span>
                       </div>
                     ) : vectorQrPayload ? (
                       <QRCodeSVG
@@ -272,7 +275,7 @@ function ProfileKeyDialog({
                     ) : (
                       <img
                         src={uploadedPreview}
-                        alt="Vista previa QR oficial"
+                        alt="Foto del código QR"
                         className="qr-thumbnail-img"
                       />
                     )}
@@ -280,24 +283,17 @@ function ProfileKeyDialog({
 
                   {/* Estado y botones de acción en fila */}
                   <div className="qr-preview-info">
-                    {vectorQrPayload ? (
-                      <div
-                        className="qr-badge-pill"
-                        style={{
-                          background: 'rgba(16, 185, 129, 0.14)',
-                          color: 'var(--accent-mint, #10b981)',
-                          borderColor: 'rgba(16, 185, 129, 0.3)',
-                        }}
-                      >
-                        <CheckCircle2 size={13} />
-                        <span>QR vectorizado en alta definición (SVG)</span>
-                      </div>
-                    ) : (
-                      <div className="qr-badge-pill">
-                        <CheckCircle2 size={13} />
-                        <span>QR Oficial cargado</span>
-                      </div>
-                    )}
+                    <div
+                      className="qr-badge-pill"
+                      style={{
+                        background: 'rgba(16, 185, 129, 0.14)',
+                        color: 'var(--accent-mint, #10b981)',
+                        borderColor: 'rgba(16, 185, 129, 0.3)',
+                      }}
+                    >
+                      <CheckCircle2 size={13} />
+                      <span>Código QR listo</span>
+                    </div>
                     <div className="qr-preview-actions">
                       <button
                         type="button"
@@ -305,13 +301,13 @@ function ProfileKeyDialog({
                         onClick={() => fileInputRef.current?.click()}
                       >
                         <UploadCloud size={14} />
-                        <span>Cambiar imagen</span>
+                        <span>Cambiar foto</span>
                       </button>
                       <button
                         type="button"
                         className="btn-danger qr-action-btn qr-remove-btn active:scale-[0.98]"
                         onClick={handleRemoveImage}
-                        title="Quitar imagen"
+                        title="Quitar foto"
                       >
                         <Trash2 size={14} />
                         <span>Quitar</span>
@@ -341,10 +337,10 @@ function ProfileKeyDialog({
                   </div>
                   <div className="qr-dropzone-text">
                     <span className="qr-dropzone-title">
-                      Selecciona o arrastra la imagen de tu QR
+                      Toca o arrastra la foto de tu código QR
                     </span>
                     <span className="qr-dropzone-sub">
-                      Capturas de Bancolombia, Nequi, Daviplata o Bre-B (hasta 5MB)
+                      Bancolombia, Nequi, Daviplata o cualquier banco
                     </span>
                   </div>
                 </div>

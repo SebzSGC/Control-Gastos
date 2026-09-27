@@ -16,7 +16,7 @@ export default function PaymentInfoModal({ profile, onClose, onOpenVoucherModal 
       >
         <div className="sheet-drag-handle" />
         <div className="modal-payment-header">
-          <h3 className="modal-payment-title">Datos para Transferir</h3>
+          <h3 className="modal-payment-title">Datos de Pago</h3>
           <button
             type="button"
             className="modal-close-btn active:scale-[0.98]"

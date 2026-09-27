@@ -50,7 +50,7 @@ export default function FloatingActionDock({
           type="button"
           className="dock-action-btn dock-btn-subtle active:scale-[0.98]"
           onClick={onOpenBillModal}
-          title="Dividir factura con OCR o en vivo"
+          title="Dividir factura con foto o en vivo"
         >
           <Receipt size={20} className="dock-icon" />
           <span className="dock-label">Dividir Factura</span>
