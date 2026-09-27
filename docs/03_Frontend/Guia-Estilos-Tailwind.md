@@ -229,6 +229,7 @@ sequenceDiagram
 
 ## Navegación Rápida
 - Regresar a: [[00_MOC_PaySync]]
+- Copywriting y Tono UX: [[03_Frontend/Guia-Copywriting-UX|Guía de Copywriting y Lenguaje Natural UX]]
 - Componentes: [[03_Frontend/Arbol-Componentes|Árbol de Componentes React 19]]
 - Estado y Reactividad: [[03_Frontend/Gestion-Estado|Gestión de Estado]]
 - Backend: [[02_Backend/WebSockets-Eventos|WebSockets y Eventos en Tiempo Real]]

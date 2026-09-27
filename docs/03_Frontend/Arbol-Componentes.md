@@ -72,14 +72,18 @@ Durante la fase de modularización y posterior rediseño minimalista fluido, la 
 - **Indicadores Numéricos Estables:**
   - Utiliza `tabular-nums` para evitar oscilaciones de diseño ante sincronizaciones en tiempo real.
   - **Gasto Total:** Suma global de todas las compras y facturas del grupo.
-  - **Cuota Equitativa (*Fair Share*):** Gasto promedio por persona ($Total / N$).
-  - **Mi Balance:** Estado financiero del usuario activo (`Acreedor`, `Deudor`, `Al día`), con micro-badges dinámicos.
+  - **Cuota por Persona:** División equitativa del gasto total entre los participantes del grupo ($Total / N$).
+  - **Tu Estado Personal:** Posición financiera directa del usuario activo (`Te deben a favor`, `Debes abonar al grupo`, `¡Estás al día, cuota saldada!`). Ver [[03_Frontend/Guia-Copywriting-UX|Guía de Copywriting UX]].
 
 ### 3. `SettlementCard.jsx`
-- **Responsabilidad:** Visualización del plan óptimo de liquidación minimizado por el [[02_Backend/Algoritmo-Liquidacion|Algoritmo Greedy]].
+- **Responsabilidad:** Visualización intuitiva del plan de liquidación minimizado por el [[02_Backend/Algoritmo-Liquidacion|Algoritmo Greedy]].
+- **Lenguaje Natural Adoptado:** En lugar de tecnicismos como *min-cash-flow* o *base justa*, comunica de manera cercana:
+  - Header: *"A cada uno le toca: $..."* y *"La forma más rápida de quedar a mano con la menor cantidad de transferencias."*
+  - Estado sin deudas: *"¡Cuentas al Día! No hay deudas pendientes entre los miembros del grupo."*
+  - Ficha de deuda: Distintivo claro *"Debes"* y botones directos *"Pagar"* y *"Subir Comprobante"*.
 - **Subcomponentes:**
-  - `SettlementItem`: Fichas de transferencia individual (deudor paga acreedor con botón para abrir `PaymentInfoModal`).
-  - `MemberBalanceItem`: Balances individuales desglosados de cada participante en el grupo.
+  - `SettlementItem`: Fichas de transferencia individual entre miembros con acceso rápido a datos de pago y comprobante.
+  - `MemberBalanceItem`: Balances individuales desglosados (*Aportó*, *Recibió* y balance neto) con botón *"Ver QR / Número"*.
 
 ### 4. `SpendingAnalytics.jsx`
 - **Responsabilidad:** Inteligencia visual del consumo del grupo mediante la librería `recharts`.
@@ -193,6 +197,7 @@ El diseño garantiza que los botones primarios no dependan del desplazamiento ve
 
 ## Navegación Rápida
 - Regresar a: [[00_MOC_PaySync]]
+- Estándares de Texto y Copy: [[03_Frontend/Guia-Copywriting-UX|Guía de Copywriting y Lenguaje Natural UX]]
 - Módulo de Pagos Bre-B: [[03_Frontend/Generador-QR-Bre-B|Generador y Visualizador de Códigos QR Bre-B]]
 - Estilos y Tokens: [[03_Frontend/Guia-Estilos-Tailwind|Sistema de Diseño y TailwindCSS]]
 - Estado y Reactividad: [[03_Frontend/Gestion-Estado|Manejo del Estado]]

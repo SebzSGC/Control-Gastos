@@ -38,6 +38,7 @@ flowchart TD
     FRONT --> FR2["[[03_Frontend/Gestion-Estado|Gestión de Estado & Reactividad]]"]
     FRONT --> FR3["[[03_Frontend/Guia-Estilos-Tailwind|Sistema de Diseño & Tailwind]]"]
     FRONT --> FR4["[[03_Frontend/Generador-QR-Bre-B|Generador QR Bre-B & Vouchers]]"]
+    FRONT --> FR5["[[03_Frontend/Guia-Copywriting-UX|Copywriting & Lenguaje Natural]]"]
 
     DEVOPS --> DO1["[[04_DevOps-Despliegue/Guia-Docker-Compose|Docker & Docker Compose]]"]
     DEVOPS --> DO2["[[04_DevOps-Despliegue/Despliegue-Cloud|Estrategia Multi-Cloud]]"]
@@ -68,6 +69,7 @@ flowchart TD
 - [[03_Frontend/Gestion-Estado|Manejo del Estado y Reactividad]]: Context API (`ThemeContext`, `ToastContext`), sincronización con Sockets y persistencia local.
 - [[03_Frontend/Guia-Estilos-Tailwind|Sistema de Diseño y Temas]]: Paletas de color, tipografía, estética Bento Grid y soporte Dark/Light Mode.
 - [[03_Frontend/Generador-QR-Bre-B|Generador QR Bre-B, Vectorización y Vouchers]]: Motor de vectorización automática con jsQR en canvas, extracción de llaves Bre-B, auto-vectorización al vuelo en DigitalCard, renderizado matemático puro (QRCodeSVG de 160px), arquitectura de 3 capas en PaymentInfoModal (.modal-payment-info) con footer fijo desacoplado del scroll, especificación EMVCo (TLV y CRC-16/CCITT), respaldo dual (SQLite y disco) y visor con Lightbox.
+- [[03_Frontend/Guia-Copywriting-UX|Guía de Copywriting y Lenguaje Natural UX]]: Estándares de comunicación cercana, eliminación de tecnicismos (EMVCo, OCR, min-cash-flow), matriz comparativa antes vs. después y política estricta de CERO EMOJIS.
 
 ### 4. DevOps, Contenedores e Infraestructura
 - [[04_DevOps-Despliegue/Guia-Docker-Compose|Orquestación con Docker Compose]]: Despliegue unificado y desacoplado (Nginx + Node.js).
