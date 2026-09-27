@@ -48,7 +48,7 @@ export default function AddTransactionModal({
 
     setIsProcessingOcr(true);
     setOcrFileName(file.name);
-    toast.info('Escaneando comprobante con OCR...');
+    toast.info('Leyendo comprobante...');
 
     const formData = new FormData();
     formData.append('receipt', file);
@@ -186,7 +186,7 @@ export default function AddTransactionModal({
               <div className="scanner-beam" />
               <div className="flex-center" style={{ gap: '0.6rem', color: 'var(--accent)', fontWeight: '600' }}>
                 <Loader2 className="animate-spin" size={22} />
-                <span>Analizando comprobante con OCR...</span>
+                <span>Leyendo comprobante...</span>
               </div>
             </div>
           ) : (
@@ -208,7 +208,7 @@ export default function AddTransactionModal({
               <span style={{ fontWeight: '600', fontSize: '0.92rem', color: 'var(--text-main)' }}>
                 {ocrFileName ? `Comprobante: ${ocrFileName}` : 'Escanear comprobante de pago'}
               </span>
-              <span className="text-subtle">Sube captura de Nequi/Bre-B para detectar el monto</span>
+              <span className="text-subtle">Sube la foto de tu comprobante para detectar el monto</span>
             </div>
           )}
         </div>

@@ -47,7 +47,7 @@ export function SettlementItem({
           </span>
           {isFromMe && (
             <span className="settlement-badge-debt">
-              Tu deuda pendiente
+              Debes
             </span>
           )}
         </div>
@@ -160,17 +160,17 @@ export function MemberBalanceItem({ member, isMe, onSelectPayProfile }) {
               title={`Ver datos de pago de ${member.name}`}
             >
               <QrCode size={12} />
-              <span>Ver QR / Llave</span>
+              <span>Ver QR / Número</span>
             </button>
           ) : (
             <button
               type="button"
               className="balance-pay-key-btn balance-pay-key-btn--empty active:scale-[0.98]"
               onClick={() => onSelectPayProfile(member)}
-              title={`${member.name} no ha configurado su llave o QR de pago`}
+              title={`${member.name} no ha configurado sus datos de pago`}
             >
               <Smartphone size={12} style={{ opacity: 0.6 }} />
-              <span>Sin llave</span>
+              <span>Sin datos de pago</span>
             </button>
           )
         )}
@@ -220,7 +220,7 @@ export default function SettlementCard({
             Balance de Cada Miembro
           </h3>
           <span className="text-subtle" style={{ fontSize: '0.8rem' }}>
-            Base justa: {formatCOP(fairShare)}
+            A cada uno le toca: {formatCOP(fairShare)}
           </span>
         </div>
 
@@ -245,7 +245,7 @@ export default function SettlementCard({
           </h3>
         </div>
         <p className="text-muted" style={{ fontSize: '0.88rem', marginBottom: '1.5rem', lineHeight: '1.4' }}>
-          Algoritmo inteligente para saldar todas las deudas con el menor número posible de transferencias.
+          La forma más rápida de quedar a mano con la menor cantidad de transferencias.
         </p>
 
         {settlements.length === 0 ? (

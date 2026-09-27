@@ -38,7 +38,7 @@ export default function PaymentVoucherModal({
   const [previewUrl, setPreviewUrl] = useState(null);
   const [amount, setAmount] = useState(initialAmount > 0 ? String(initialAmount) : '');
   const [voucherRef, setVoucherRef] = useState('');
-  const [description, setDescription] = useState('Pago de deuda liquidada');
+  const [description, setDescription] = useState('');
   const [detectedBank, setDetectedBank] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,12 +52,12 @@ export default function PaymentVoucherModal({
 
     const allowed = ['image/jpeg', 'image/png', 'image/webp'];
     if (!allowed.includes(file.type)) {
-      toast.warning('Formato no admitido. Usa capturas JPEG, PNG o WebP.');
+      toast.warning('Formato no admitido. Sube una foto en formato JPG o PNG.');
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      toast.warning('El archivo supera el límite de 10MB.');
+      toast.warning('La foto supera el límite de 10MB.');
       return;
     }
 
@@ -93,11 +93,11 @@ export default function PaymentVoucherModal({
         if (data.bank && data.bank !== 'other') {
           setDetectedBank(data.bank);
         }
-        toast.success('Comprobante analizado con éxito');
+        toast.success('Comprobante leído con éxito');
       }
     } catch (err) {
       console.warn('OCR scan fallback:', err);
-      toast.info('No se detectaron datos automáticos. Puedes ingresarlos manualmente.');
+      toast.info('No pudimos leer los datos automáticamente. Puedes escribirlos tú mismo.');
     } finally {
       setIsScanning(false);
     }
@@ -124,12 +124,12 @@ export default function PaymentVoucherModal({
 
     const numericAmount = Number(amount);
     if (!numericAmount || numericAmount <= 0) {
-      toast.warning('Ingresa un monto válido mayor a 0');
+      toast.warning('Ingresa un valor válido mayor a 0');
       return;
     }
 
     if (!voucherFile) {
-      toast.warning('Debes adjuntar la imagen del comprobante de pago');
+      toast.warning('Debes adjuntar la foto del comprobante');
       return;
     }
 
@@ -144,7 +144,7 @@ export default function PaymentVoucherModal({
       if (voucherRef.trim()) {
         formData.append('voucher_ref', voucherRef.trim());
       }
-      formData.append('description', description.trim() || 'Pago de deuda liquidada');
+      formData.append('description', description.trim() || 'Pago de deuda');
 
       const res = await fetch(`${API_URL}/expenses/voucher-settlement`, {
         method: 'POST',
@@ -154,15 +154,15 @@ export default function PaymentVoucherModal({
       const resData = await res.json();
 
       if (!res.ok) {
-        throw new Error(resData.error || 'Error al registrar la liquidación');
+        throw new Error(resData.error || 'Error al registrar el pago');
       }
 
-      toast.success('Deuda liquidada y comprobante guardado');
+      toast.success('Pago confirmado con éxito');
       if (onSuccess) onSuccess(resData);
       onClose();
     } catch (err) {
       console.error(err);
-      toast.error(err.message || 'No se pudo registrar la liquidación');
+      toast.error(err.message || 'No se pudo registrar el pago');
     } finally {
       setIsSubmitting(false);
     }
@@ -199,7 +199,7 @@ export default function PaymentVoucherModal({
                 Subir Comprobante de Pago
               </h3>
               <p className="text-subtle" style={{ margin: '0.15rem 0 0 0', fontSize: '0.82rem' }}>
-                Liquidación automática e instantánea en el balance grupal.
+                Sube la foto de tu transferencia para marcar esta deuda como pagada.
               </p>
             </div>
           </div>
@@ -253,7 +253,7 @@ export default function PaymentVoucherModal({
                   color: 'var(--text-secondary)',
                 }}
               >
-                Llave: {targetCreditor.payment_key}
+                Número: {targetCreditor.payment_key}
               </span>
             )}
           </div>
@@ -268,7 +268,7 @@ export default function PaymentVoucherModal({
             }}
           >
             <span className="text-subtle" style={{ fontSize: '0.8rem' }}>
-              Deuda pendiente sugerida:
+              Deuda pendiente:
             </span>
             <span
               className="num-tabular"
@@ -283,7 +283,7 @@ export default function PaymentVoucherModal({
           {/* File Picker / Dropzone */}
           <div>
             <label className="input-label" style={{ marginBottom: '0.45rem' }}>
-              Captura del Comprobante Bancario
+              Foto del comprobante
             </label>
 
             <input
@@ -354,7 +354,7 @@ export default function PaymentVoucherModal({
                             borderRadius: 'var(--radius-pill)',
                           }}
                         >
-                          {detectedBank}
+                          Banco detectado: {detectedBank}
                         </span>
                       )}
                     </div>
@@ -376,7 +376,7 @@ export default function PaymentVoucherModal({
                         }}
                       >
                         <Loader2 size={13} className="animate-spin" />
-                        <span>Analizando datos por OCR...</span>
+                        <span>Leyendo comprobante...</span>
                       </div>
                     )}
                   </div>
@@ -389,7 +389,7 @@ export default function PaymentVoucherModal({
                       style={{ fontSize: '0.8rem', padding: '0.45rem 0.65rem' }}
                       disabled={isScanning || isSubmitting}
                     >
-                      Cambiar
+                      Cambiar foto
                     </button>
                     <button
                       type="button"
@@ -462,10 +462,10 @@ export default function PaymentVoucherModal({
                 </div>
                 <div>
                   <span style={{ fontWeight: '600', fontSize: '0.92rem', color: 'var(--text-main)', display: 'block' }}>
-                    Arrastra o selecciona el comprobante de pago
+                    Toca o arrastra la foto de tu comprobante
                   </span>
                   <span className="text-subtle" style={{ fontSize: '0.8rem', display: 'block', marginTop: '0.25rem' }}>
-                    Capturas de Nequi, Bancolombia, Bre-B, Daviplata (JPEG, PNG o WebP)
+                    Bancolombia, Nequi, Daviplata o cualquier banco
                   </span>
                 </div>
               </div>
@@ -477,7 +477,7 @@ export default function PaymentVoucherModal({
             {/* Monto */}
             <div>
               <label className="input-label" htmlFor="voucher-amount-input">
-                Monto a Saldar (COP)
+                Valor pagado
               </label>
               <div style={{ position: 'relative' }}>
                 <span
@@ -499,7 +499,7 @@ export default function PaymentVoucherModal({
                   className="glass-input num-tabular"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  placeholder="0"
+                  placeholder="Monto transferido"
                   style={{ paddingLeft: '2.2rem', fontWeight: '700', fontSize: '1.05rem' }}
                   required
                 />
@@ -509,7 +509,7 @@ export default function PaymentVoucherModal({
             {/* Referencia */}
             <div>
               <label className="input-label" htmlFor="voucher-ref-input">
-                Número de Comprobante / Referencia
+                Número de comprobante
               </label>
               <input
                 id="voucher-ref-input"
@@ -517,17 +517,14 @@ export default function PaymentVoucherModal({
                 className="glass-input num-tabular"
                 value={voucherRef}
                 onChange={(e) => setVoucherRef(e.target.value)}
-                placeholder="Ej. M1234567 o 987654321"
+                placeholder="Ej. 12345678"
               />
-              <span className="text-subtle" style={{ display: 'block', marginTop: '0.3rem', fontSize: '0.78rem' }}>
-                Número único provisto por tu banco para validar la transacción.
-              </span>
             </div>
 
             {/* Descripción */}
             <div>
               <label className="input-label" htmlFor="voucher-desc-input">
-                Descripción / Nota
+                Nota (opcional)
               </label>
               <input
                 id="voucher-desc-input"
@@ -535,7 +532,7 @@ export default function PaymentVoucherModal({
                 className="glass-input"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Nota informativa de la liquidación"
+                placeholder="Ej. Pago almuerzo"
               />
             </div>
           </div>
@@ -560,12 +557,12 @@ export default function PaymentVoucherModal({
               {isSubmitting ? (
                 <>
                   <Loader2 size={16} className="animate-spin" />
-                  <span>Procesando comprobante...</span>
+                  <span>Guardando pago...</span>
                 </>
               ) : (
                 <>
                   <CheckCircle2 size={16} />
-                  <span>Confirmar y Liquidar Deuda</span>
+                  <span>Confirmar Pago</span>
                 </>
               )}
             </button>
